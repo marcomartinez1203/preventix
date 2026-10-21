@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { createDemoStore, DemoError, type Database } from './store';
 import type { JsonPersistence } from './persistence';
+import { StorageConflictError } from './persistence';
 
 const nonempty = z.string().trim().min(1);
 const date = z.string().refine(v => Number.isFinite(Date.parse(v)), 'Fecha inválida');
@@ -109,6 +110,7 @@ export function createDemoRouter(source: string | JsonPersistence<Database>, sec
     } catch (error) {
       if (error instanceof z.ZodError) { res.status(400).json({ message: error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join('; ') }); return; }
       if (error instanceof DemoError) { res.status(error.status).json({ message: error.message }); return; }
+      if (error instanceof StorageConflictError) { res.status(409).json({ message: error.message }); return; }
       console.error('Error en API de sustentación:', error);
       res.status(500).json({ message: 'No se pudo completar la operación en el servidor.' });
     }

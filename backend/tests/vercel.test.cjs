@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const { BlobError, BlobPreconditionFailedError } = require('@vercel/blob');
+const { BlobError, BlobPreconditionFailedError, BlobNotFoundError } = require('@vercel/blob');
 const { blobPersistence } = require('../dist/demo/persistence');
 const { createDemoStore } = require('../dist/demo/store');
 const { createDemoRouter } = require('../dist/demo/routes');
@@ -16,6 +16,10 @@ function blobService() {
     get conflicts() { return conflicts; },
     get writes() { return writes; },
     client: {
+      async head() {
+        if (content === undefined) throw new BlobNotFoundError();
+        return { etag: String(version) };
+      },
       async get(_path, options) {
         assert.equal(options.access, 'private');
         assert.equal(options.useCache, false);
@@ -37,6 +41,46 @@ function blobService() {
     },
   };
 }
+
+test('Blob: transport ETags differing from metadata must not break login', async () => {
+  const service = blobService();
+  const originalGet = service.client.get;
+  service.client.get = async (...args) => {
+    const result = await originalGet(...args);
+    if (result) result.blob.etag = `W/"transport-${result.blob.etag}"`;
+    return result;
+  };
+  const store = createDemoStore(blobPersistence('demo.json', service.client));
+  await store.execute({ method: 'get', url: '/equipos' });
+  const result = await store.execute({ method: 'post', url: '/auth/login', body: { email: 'demo@preventix.com', password: 'Demo1234' } });
+  assert.equal(result.usuario.id, 'u1');
+  await store.session('create', 'regression-session', 'u1');
+  assert.equal((await store.session('get', 'regression-session')).userId, 'u1');
+});
+
+test('Blob: real SDK uses the configured read-write token even when OIDC is present', async t => {
+  const { MockAgent, getGlobalDispatcher, setGlobalDispatcher } = require('undici');
+  const sdk = require('@vercel/blob');
+  const names = ['BLOB_READ_WRITE_TOKEN', 'VERCEL_OIDC_TOKEN', 'BLOB_STORE_ID'];
+  const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
+  const token = 'vercel_blob_rw_teststore_synthetic';
+  process.env.BLOB_READ_WRITE_TOKEN = token;
+  process.env.VERCEL_OIDC_TOKEN = 'synthetic-oidc';
+  process.env.BLOB_STORE_ID = 'store_different';
+  const dispatcher = getGlobalDispatcher();
+  const mock = new MockAgent(); mock.disableNetConnect(); setGlobalDispatcher(mock);
+  t.after(async () => {
+    setGlobalDispatcher(dispatcher); await mock.close();
+    for (const name of names) { if (previous[name] === undefined) delete process.env[name]; else process.env[name] = previous[name]; }
+  });
+  mock.get('https://teststore.private.blob.vercel-storage.com')
+    .intercept({ method: 'GET', path: '/demo.json?cache=0', headers: { authorization: 'Bearer ' + token } })
+    .reply(404, '');
+  let saved = false;
+  const client = { get: sdk.get, head: sdk.head, put: async (_path, _body, options) => { assert.equal(options.token, token); saved = true; } };
+  await blobPersistence('demo.json', client).transaction(async () => ({ value: 0 }), async data => { data.value = 1; });
+  assert.ok(saved); mock.assertNoPendingInterceptors();
+});
 
 test('Blob: independent instances retry conflicting writes without losing records', async () => {
   const service = blobService();
