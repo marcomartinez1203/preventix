@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { createDemoStore, DemoError } from './store';
+import { createDemoStore, DemoError, type Database } from './store';
+import type { JsonPersistence } from './persistence';
 
 const nonempty = z.string().trim().min(1);
 const date = z.string().refine(v => Number.isFinite(Date.parse(v)), 'Fecha inválida');
@@ -16,20 +17,23 @@ const schemas = {
 };
 type SessionData = { usuario: { id: string; rol: string; activo: boolean; [key: string]: unknown }; empresa: unknown };
 
-export function createDemoRouter(filePath: string, secret: string) {
+export function createDemoRouter(source: string | JsonPersistence<Database>, secret: string, secureCookies = false) {
   const router = Router();
-  const store = createDemoStore(filePath);
-  const sessions = new Map<string, { userId: string; expires: number }>();
+  const store = createDemoStore(source);
   const cookieName = 'preventixDemoRefresh';
-  const cookieOptions = { httpOnly: true, sameSite: 'lax' as const, path: '/api/auth', maxAge: 7 * 24 * 60 * 60 * 1000 };
-  const sign = (userId: string, sid: string, kind: 'access' | 'refresh') => jwt.sign({ sub: userId, sid, kind }, secret, { expiresIn: kind === 'access' ? '15m' : '7d' });
-  const verify = (token: string | undefined, kind: string) => {
+  const cookieOptions = { httpOnly: true, secure: secureCookies, sameSite: 'lax' as const, path: '/api/auth', maxAge: 7 * 24 * 60 * 60 * 1000 };
+  const sign = (userId: string, sid: string, kind: 'access' | 'refresh') => jwt.sign({ sub: userId, sid, kind }, secret, { algorithm: 'HS256', issuer: 'preventix-demo', expiresIn: kind === 'access' ? '15m' : '7d' });
+  const verify = async (token: string | undefined, kind: string) => {
     try {
-      const payload = jwt.verify(token ?? '', secret) as jwt.JwtPayload;
-      const entry = sessions.get(payload.sid);
+      const payload = jwt.verify(token ?? '', secret, { algorithms: ['HS256'], issuer: 'preventix-demo' }) as jwt.JwtPayload;
+      if (typeof payload.sid !== 'string' || typeof payload.sub !== 'string') throw new Error();
+      const entry = await store.session('get', payload.sid);
       if (payload.kind !== kind || !entry || entry.userId !== payload.sub || entry.expires < Date.now()) throw new Error();
       return { userId: entry.userId, sid: payload.sid as string };
-    } catch { throw new DemoError('Sesión inválida o expirada.', 401); }
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError || (error instanceof Error && !error.message)) throw new DemoError('Sesión inválida o expirada.', 401);
+      throw error;
+    }
   };
 
   router.use(async (req, res) => {
@@ -41,25 +45,25 @@ export function createDemoRouter(filePath: string, secret: string) {
       if (req.path === '/auth/login' && method === 'post') {
         const body = z.object({ email: z.string().email(), password: nonempty }).parse(req.body);
         const result = await execute(body) as SessionData;
-        for (const [sid, session] of sessions) if (session.expires < Date.now()) sessions.delete(sid);
         const sid = randomUUID();
-        sessions.set(sid, { userId: result.usuario.id, expires: Date.now() + cookieOptions.maxAge });
+        await store.session('create', sid, result.usuario.id);
         res.cookie(cookieName, sign(result.usuario.id, sid, 'refresh'), cookieOptions);
         res.json({ data: { ...result, accessToken: sign(result.usuario.id, sid, 'access') } });
         return;
       }
       if (req.path === '/auth/refresh' && method === 'post') {
-        const session = verify(req.cookies?.[cookieName], 'refresh');
+        const session = await verify(req.cookies?.[cookieName], 'refresh');
         await store.execute({ url: '/auth/me', method: 'get', actorId: session.userId });
         res.json({ data: { accessToken: sign(session.userId, session.sid, 'access') } });
         return;
       }
       if (req.path === '/auth/logout' && method === 'post') {
-        try { sessions.delete(verify(req.cookies?.[cookieName], 'refresh').sid); } catch { /* Clearing an expired session is safe. */ }
-        res.clearCookie(cookieName, { path: cookieOptions.path });
+        try { const session = await verify(req.cookies?.[cookieName], 'refresh'); await store.session('delete', session.sid); }
+        catch (error) { if (!(error instanceof DemoError && error.status === 401)) throw error; }
+        res.clearCookie(cookieName, { path: cookieOptions.path, secure: secureCookies, sameSite: 'lax', httpOnly: true });
         res.json({ data: {} }); return;
       }
-      const session = verify(req.headers.authorization?.replace(/^Bearer /, ''), 'access');
+      const session = await verify(req.headers.authorization?.replace(/^Bearer /, ''), 'access');
       const current = await store.execute({ url: '/auth/me', method: 'get', actorId: session.userId }) as SessionData;
       if (extra) throw new DemoError('Ruta no encontrada.', 404);
       if (method !== 'get') {

@@ -4,6 +4,8 @@
 
 El frontend se conecta al backend Express por HTTP. El backend valida el usuario predefinido `demo@preventix.com` / `Demo1234` y persiste equipos, fallas, mantenimientos y configuración en `backend/.data/demo.json`. No se requiere base de datos externa.
 
+El despliegue conjunto en Vercel está preparado mediante `vercel.json` y una Function de Express. Utiliza un JSON privado de Vercel Blob para persistir datos y sesiones entre instancias. Consulta `VERCEL.md` para conectar el almacén y configurar JWT_SECRET.
+
 Ejecuta `npm run dev` para iniciar ambas partes. El modo de sustentación está activo por defecto en desarrollo. El frontend ya no utiliza un adaptador local ni guarda el inventario en el navegador. Consulta `README.md` y `frontend/README.md` para el recorrido de clase y las pruebas.
 
 Los vencimientos se actualizan al consultar la API; hay notificaciones internas y reportes CSV compatibles con Excel. El envío de correos, el análisis predictivo y la integración de producción con PostgreSQL quedan fuera del MVP para clase.

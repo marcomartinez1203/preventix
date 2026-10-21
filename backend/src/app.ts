@@ -38,7 +38,7 @@ app.get('/health', (_req, res) => {
 
 // ── API Routes ────────────────────────────────────────
 if (config.demoMode) {
-  app.use('/api', createDemoRouter(path.resolve(__dirname, '../.data/demo.json'), config.jwt.secret));
+  app.use('/api', createDemoRouter(path.resolve(__dirname, '../.data/demo.json'), config.jwt.secret, config.nodeEnv === 'production'));
 } else {
   app.use('/api/auth', require('./modules/auth/auth.routes').default);
   app.use('/api/empresa', require('./modules/empresas/empresas.routes').default);

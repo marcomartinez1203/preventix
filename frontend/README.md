@@ -10,7 +10,7 @@ npm run dev
 
 Abre http://localhost:5173 e inicia sesión con `demo@preventix.com` y `Demo1234`. El formulario incluye esas credenciales para la sustentación. No necesitas registrar una empresa.
 
-Los equipos, fallas y mantenimientos se consultan y modifican en el backend. El servidor guarda los datos en `backend/.data/demo.json`, por lo que se conservan al recargar el navegador y reiniciar el servidor. La sesión utiliza un token JWT y una cookie httpOnly para su renovación. Reiniciar el backend requiere iniciar sesión otra vez.
+Los equipos, fallas y mantenimientos se consultan y modifican en el backend. El servidor guarda los datos en `backend/.data/demo.json`, por lo que se conservan al recargar el navegador y reiniciar el servidor. La sesión utiliza un token JWT y una cookie httpOnly para su renovación. Las sesiones se guardan junto con los datos y se conservan tras reiniciar.
 
 ## Recorrido para clase
 
@@ -35,3 +35,7 @@ npm run build:frontend
 `dev:frontend` inicia solo la interfaz y requiere tener el backend encendido en otra terminal con `npm run dev:backend`.
 
 La configuración de Vite unifica las copias de React de los workspaces para evitar errores de hooks.
+
+## Vercel
+
+La interfaz y el backend se despliegan juntos desde la raíz del repositorio. No selecciones `frontend` como Root Directory. Sigue `../VERCEL.md` para conectar Blob privado y configurar JWT_SECRET.

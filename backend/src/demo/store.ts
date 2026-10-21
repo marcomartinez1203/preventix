@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import path from 'node:path';
 import bcrypt from 'bcryptjs';
+import { filePersistence, type JsonPersistence } from './persistence';
 const crypto = { randomUUID };
 
 type Row = { id: string; [key: string]: unknown };
 type Collection = 'equipos' | 'fallas' | 'mantenimientos' | 'usuarios' | 'sedes' | 'notificaciones' | 'historial';
-type Database = Record<Collection, Row[]> & { empresa: Row; configuracion: Row; passwords: Record<string, string> };
+type DemoSession = { userId: string; expires: number };
+export type Database = Record<Collection, Row[]> & { empresa: Row; configuracion: Row; passwords: Record<string, string>; sessions?: Record<string, DemoSession> };
 const now = () => new Date().toISOString();
 const day = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + offset); d.setHours(12, 0, 0, 0); return d.toISOString(); };
 const text = (value: unknown) => String(value ?? '');
@@ -60,27 +60,15 @@ export interface DemoRequest {
   actorId?: string;
 }
 
-export function createDemoStore(filePath: string) {
-  async function save(db: Database) {
-    await mkdir(path.dirname(filePath), { recursive: true });
-    await writeFile(filePath + '.tmp', JSON.stringify(db, null, 2), 'utf8');
-    await rename(filePath + '.tmp', filePath);
+export function createDemoStore(source: string | JsonPersistence<Database>) {
+  const persistence = typeof source === 'string' ? filePersistence<Database>(source) : source;
+  async function initial() {
+    const db = seed();
+    db.passwords.u1 = await hash('Demo1234');
+    db.sessions = {};
+    return db;
   }
-  async function read(): Promise<Database> {
-    try {
-      const data = JSON.parse(await readFile(filePath, 'utf8')) as Database;
-      if (!data.equipos || !data.usuarios || !data.passwords) throw new Error('Formato inválido');
-      return data;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new DemoError('No se pudo leer el archivo de datos del servidor.', 500);
-      const db = seed();
-      db.passwords.u1 = await hash('Demo1234');
-      await save(db);
-      return db;
-    }
-  }
-  async function execute(input: DemoRequest) {
-    const db = await read();
+  async function execute(db: Database, input: DemoRequest) {
     const method = input.method.toLowerCase();
     const [kind, id, action] = input.url.split('/').filter(Boolean);
     const body = input.body ?? {};
@@ -187,16 +175,23 @@ export function createDemoStore(filePath: string) {
       }
     }
 
-    await save(db);
     return result;
   }
-  // Serialize transactions so concurrent HTTP requests cannot overwrite each other.
-  let queue: Promise<unknown> = Promise.resolve();
   return {
     execute(input: DemoRequest): Promise<unknown> {
-      const result = queue.then(() => execute(input));
-      queue = result.catch(() => undefined);
-      return result;
+      return persistence.transaction(initial, db => execute(db, input));
+    },
+    session(action: 'create' | 'get' | 'delete', sid: string, userId?: string): Promise<DemoSession | undefined> {
+      return persistence.transaction(initial, async db => {
+        const sessions = db.sessions ??= {};
+        if (action === 'create') {
+          const user = find(db.usuarios, userId);
+          if (!user?.activo) throw new DemoError('Usuario no autorizado.', 401);
+          for (const [id, session] of Object.entries(sessions)) if (session.expires < Date.now()) delete sessions[id];
+          sessions[sid] = { userId: user!.id, expires: Date.now() + 7 * 24 * 60 * 60 * 1000 };
+        } else if (action === 'delete') delete sessions[sid];
+        return sessions[sid];
+      });
     },
   };
 }
