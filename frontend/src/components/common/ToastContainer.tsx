@@ -6,15 +6,15 @@ interface ToastContainerProps {
 }
 
 const icons = {
-  success: <CheckCircle className="w-5 h-5 text-green-500" />,
-  error: <XCircle className="w-5 h-5 text-red-500" />,
-  info: <Info className="w-5 h-5 text-blue-500" />,
+  success: <CheckCircle className="w-5 h-5 text-emerald-400" />,
+  error: <XCircle className="w-5 h-5 text-red-400" />,
+  info: <Info className="w-5 h-5 text-brand" />,
 };
 
 const colors = {
-  success: 'border-green-200 bg-green-50',
-  error: 'border-red-200 bg-red-50',
-  info: 'border-blue-200 bg-blue-50',
+  success: 'border-emerald-400/25 bg-emerald-400/10',
+  error: 'border-red-400/25 bg-red-400/10',
+  info: 'border-brand/25 bg-brand/10',
 };
 
 export default function ToastContainer({ toasts }: ToastContainerProps) {
@@ -27,7 +27,7 @@ export default function ToastContainer({ toasts }: ToastContainerProps) {
           className={`flex items-start gap-3 px-4 py-3 rounded-lg border shadow-lg ${colors[t.type]} animate-fade-in`}
         >
           {icons[t.type]}
-          <p className="text-sm text-slate-800 flex-1">{t.message}</p>
+          <p className="text-sm text-zinc-100 flex-1">{t.message}</p>
         </div>
       ))}
     </div>

@@ -59,9 +59,9 @@ function TabEmpresa() {
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
-      <div><label className="label">Nombre de la empresa *</label><input {...register('nombre')} className="input" />{errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre.message}</p>}</div>
+      <div><label className="label">Nombre de la empresa *</label><input {...register('nombre')} className="input" />{errors.nombre && <p className="text-xs text-red-400 mt-1">{errors.nombre.message}</p>}</div>
       <div><label className="label">NIT / RUC</label><input {...register('nit')} className="input" placeholder="Ej: 900.123.456-7" /></div>
-      <div><label className="label">Email de contacto *</label><input type="email" {...register('emailContacto')} className="input" />{errors.emailContacto && <p className="text-xs text-red-500 mt-1">{errors.emailContacto.message}</p>}</div>
+      <div><label className="label">Email de contacto *</label><input type="email" {...register('emailContacto')} className="input" />{errors.emailContacto && <p className="text-xs text-red-400 mt-1">{errors.emailContacto.message}</p>}</div>
       <div><label className="label">Teléfono</label><input {...register('telefono')} className="input" placeholder="Ej: +57 300 000 0000" /></div>
       <button type="submit" disabled={isSubmitting} className="btn-primary">{isSubmitting ? 'Guardando...' : 'Guardar cambios'}</button>
     </form>
@@ -89,15 +89,15 @@ function TabConfig() {
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-lg">
-      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+      <div className="flex items-center justify-between p-4 bg-ink rounded-xl">
         <div>
-          <p className="text-sm font-medium text-slate-700">Notificaciones por email</p>
-          <p className="text-xs text-slate-400">Preferencia guardada; la demo no envía correos</p>
+          <p className="text-sm font-medium text-zinc-200">Notificaciones por email</p>
+          <p className="text-xs text-zinc-400">Preferencia guardada; la demo no envía correos</p>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" {...register('notifEmail')} className="sr-only peer" />
-          <div className="w-10 h-6 bg-slate-300 peer-checked:bg-blue-600 rounded-full transition-colors" />
-          <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+          <div className="w-10 h-6 bg-zinc-600 peer-checked:bg-brand rounded-full transition-colors" />
+          <div className="absolute left-1 top-1 w-4 h-4 bg-surface rounded-full shadow transition-transform peer-checked:translate-x-4" />
         </label>
       </div>
       <div>
@@ -171,7 +171,7 @@ function TabSedes() {
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-slate-500">{sedes.length} sede{sedes.length !== 1 ? 's' : ''} registrada{sedes.length !== 1 ? 's' : ''}</p>
+        <p className="text-sm text-zinc-400">{sedes.length} sede{sedes.length !== 1 ? 's' : ''} registrada{sedes.length !== 1 ? 's' : ''}</p>
         <button onClick={() => setSedeModal(true)} className="btn-primary flex items-center gap-2 text-sm"><Plus className="w-4 h-4" /> Nueva sede</button>
       </div>
 
@@ -180,26 +180,26 @@ function TabSedes() {
           <div key={s.id} className="card overflow-hidden">
             <button
               onClick={() => setExpandida(expandida === s.id ? null : s.id)}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-ink transition-colors"
             >
               <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-blue-500" />
+                <MapPin className="w-4 h-4 text-brand" />
                 <div className="text-left">
-                  <p className="font-medium text-slate-800 text-sm">{s.nombre}</p>
-                  {s.ciudad && <p className="text-xs text-slate-400">{s.ciudad}</p>}
+                  <p className="font-medium text-zinc-100 text-sm">{s.nombre}</p>
+                  {s.ciudad && <p className="text-xs text-zinc-400">{s.ciudad}</p>}
                 </div>
               </div>
-              {expandida === s.id ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+              {expandida === s.id ? <ChevronDown className="w-4 h-4 text-zinc-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
             </button>
             {expandida === s.id && (
-              <div className="border-t border-slate-100 px-4 py-3 space-y-2 bg-slate-50/50">
+              <div className="border-t border-zinc-800 px-4 py-3 space-y-2 bg-ink">
                 {s.ubicaciones?.length ? s.ubicaciones.map((u) => (
-                  <div key={u.id} className="flex items-center gap-2 text-sm text-slate-600">
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
-                    {u.nombre} {u.descripcion && <span className="text-slate-400">– {u.descripcion}</span>}
+                  <div key={u.id} className="flex items-center gap-2 text-sm text-zinc-300">
+                    <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
+                    {u.nombre} {u.descripcion && <span className="text-zinc-400">– {u.descripcion}</span>}
                   </div>
-                )) : <p className="text-xs text-slate-400">Sin ubicaciones</p>}
-                <button onClick={() => setUbModal(s.id)} className="text-xs text-blue-600 hover:underline flex items-center gap-1 mt-2"><Plus className="w-3 h-3" /> Agregar ubicación</button>
+                )) : <p className="text-xs text-zinc-400">Sin ubicaciones</p>}
+                <button onClick={() => setUbModal(s.id)} className="text-xs text-brand hover:underline flex items-center gap-1 mt-2"><Plus className="w-3 h-3" /> Agregar ubicación</button>
               </div>
             )}
           </div>
@@ -209,7 +209,7 @@ function TabSedes() {
       {/* Modal nueva sede */}
       <Modal open={sedeModal} onClose={() => setSedeModal(false)} title="Nueva sede">
         <form onSubmit={sedeForm.handleSubmit(crearSede)} className="space-y-4">
-          <div><label className="label">Nombre *</label><input {...sedeForm.register('nombre')} className="input" />{sedeForm.formState.errors.nombre && <p className="text-xs text-red-500 mt-1">{sedeForm.formState.errors.nombre.message}</p>}</div>
+          <div><label className="label">Nombre *</label><input {...sedeForm.register('nombre')} className="input" />{sedeForm.formState.errors.nombre && <p className="text-xs text-red-400 mt-1">{sedeForm.formState.errors.nombre.message}</p>}</div>
           <div><label className="label">Dirección</label><input {...sedeForm.register('direccion')} className="input" /></div>
           <div><label className="label">Ciudad</label><input {...sedeForm.register('ciudad')} className="input" /></div>
           <div className="flex gap-3"><button type="button" onClick={() => setSedeModal(false)} className="btn-secondary flex-1">Cancelar</button><button type="submit" disabled={sedeForm.formState.isSubmitting} className="btn-primary flex-1">Crear sede</button></div>
@@ -219,7 +219,7 @@ function TabSedes() {
       {/* Modal nueva ubicación */}
       <Modal open={!!ubModal} onClose={() => setUbModal(null)} title="Nueva ubicación" size="sm">
         <form onSubmit={ubForm.handleSubmit(crearUb)} className="space-y-4">
-          <div><label className="label">Nombre *</label><input {...ubForm.register('nombre')} className="input" placeholder="Ej: Sala de servidores" />{ubForm.formState.errors.nombre && <p className="text-xs text-red-500 mt-1">{ubForm.formState.errors.nombre.message}</p>}</div>
+          <div><label className="label">Nombre *</label><input {...ubForm.register('nombre')} className="input" placeholder="Ej: Sala de servidores" />{ubForm.formState.errors.nombre && <p className="text-xs text-red-400 mt-1">{ubForm.formState.errors.nombre.message}</p>}</div>
           <div><label className="label">Descripción</label><input {...ubForm.register('descripcion')} className="input" /></div>
           <div className="flex gap-3"><button type="button" onClick={() => setUbModal(null)} className="btn-secondary flex-1">Cancelar</button><button type="submit" disabled={ubForm.formState.isSubmitting} className="btn-primary flex-1">Crear</button></div>
         </form>
@@ -244,8 +244,8 @@ export default function ConfiguracionPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-2xl mb-2">🔒</p>
-          <p className="text-lg font-medium text-slate-700">Acceso restringido</p>
-          <p className="text-sm text-slate-400 mt-1">Solo administradores pueden acceder a configuración</p>
+          <p className="text-lg font-medium text-zinc-200">Acceso restringido</p>
+          <p className="text-sm text-zinc-400 mt-1">Solo administradores pueden acceder a configuración</p>
         </div>
       </div>
     );
@@ -254,8 +254,8 @@ export default function ConfiguracionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Configuración</h1>
-        <p className="text-slate-500 text-sm mt-0.5">Administra los datos de tu empresa y preferencias</p>
+        <h1 className="text-2xl font-bold text-zinc-100">Configuración</h1>
+        <p className="text-zinc-400 text-sm mt-0.5">Administra los datos de tu empresa y preferencias</p>
       </div>
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Tabs laterales */}
@@ -265,7 +265,7 @@ export default function ConfiguracionPage() {
               key={id}
               onClick={() => setTab(id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                tab === id ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100'
+                tab === id ? 'bg-brand/10 text-brand' : 'text-zinc-300 hover:bg-raised'
               }`}
             >
               <Icon className="w-4 h-4" />

@@ -17,15 +17,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 // ─── Helpers ────────────────────────────────────
 const estadoMantColor: Record<EstadoMantenimiento, string> = {
-  programado: 'bg-slate-100 text-slate-600',
-  en_proceso: 'bg-blue-100 text-blue-700',
-  completado: 'bg-green-100 text-green-700',
-  cancelado: 'bg-red-100 text-red-600',
-  vencido: 'bg-red-200 text-red-800',
+  programado: 'bg-raised text-zinc-300',
+  en_proceso: 'bg-brand/15 text-brand',
+  completado: 'bg-emerald-400/10 text-emerald-400',
+  cancelado: 'bg-red-400/10 text-red-400',
+  vencido: 'bg-red-400/20 text-red-400',
 };
 const tipoMantColor: Record<TipoMantenimiento, string> = {
-  preventivo: 'bg-blue-100 text-blue-700',
-  correctivo: 'bg-orange-100 text-orange-700',
+  preventivo: 'bg-brand/15 text-brand',
+  correctivo: 'bg-orange-400/15 text-orange-300',
 };
 
 const TABS: { label: string; value: string }[] = [
@@ -91,12 +91,12 @@ function MantForm({ mant, onClose }: { mant?: Mantenimiento; onClose: () => void
           <option value="">Seleccionar equipo...</option>
           {equipos.map((e: { id: string; nombre: string }) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
         </select>
-        {errors.equipoId && <p className="text-xs text-red-500 mt-1">{errors.equipoId.message}</p>}
+        {errors.equipoId && <p className="text-xs text-red-400 mt-1">{errors.equipoId.message}</p>}
       </div>
       <div>
         <label className="label">Título *</label>
         <input {...register('titulo')} className="input" placeholder="Ej: Mantenimiento preventivo mensual" />
-        {errors.titulo && <p className="text-xs text-red-500 mt-1">{errors.titulo.message}</p>}
+        {errors.titulo && <p className="text-xs text-red-400 mt-1">{errors.titulo.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -109,7 +109,7 @@ function MantForm({ mant, onClose }: { mant?: Mantenimiento; onClose: () => void
         <div>
           <label className="label">Fecha programada *</label>
           <input type="date" {...register('fechaProgramada')} className="input" />
-          {errors.fechaProgramada && <p className="text-xs text-red-500 mt-1">{errors.fechaProgramada.message}</p>}
+          {errors.fechaProgramada && <p className="text-xs text-red-400 mt-1">{errors.fechaProgramada.message}</p>}
         </div>
       </div>
       <div>
@@ -118,7 +118,7 @@ function MantForm({ mant, onClose }: { mant?: Mantenimiento; onClose: () => void
           <option value="">Seleccionar responsable...</option>
           {usuarios.map((u: { id: string; nombre: string }) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
         </select>
-        {errors.responsableId && <p className="text-xs text-red-500 mt-1">{errors.responsableId.message}</p>}
+        {errors.responsableId && <p className="text-xs text-red-400 mt-1">{errors.responsableId.message}</p>}
       </div>
       <div>
         <label className="label">Actividades a realizar</label>
@@ -131,7 +131,7 @@ function MantForm({ mant, onClose }: { mant?: Mantenimiento; onClose: () => void
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="label">Costo estimado</label>
-          <input type="number" min="0" step="0.01" {...register('costo')} className="input" placeholder="0" />{errors.costo && <p className="text-xs text-red-500">{errors.costo.message}</p>}
+          <input type="number" min="0" step="0.01" {...register('costo')} className="input" placeholder="0" />{errors.costo && <p className="text-xs text-red-400">{errors.costo.message}</p>}
         </div>
         <div>
           <label className="label">Vincular a falla</label>
@@ -171,17 +171,17 @@ function DetalleModal({ mant, onClose }: { mant: Mantenimiento; onClose: () => v
           <span className={`badge ${tipoMantColor[mant.tipo]}`}>{mant.tipo}</span>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div><p className="text-slate-500">Equipo</p><p className="font-medium">{mant.equipo.nombre}</p></div>
-          <div><p className="text-slate-500">Responsable</p><p className="font-medium">{mant.responsable.nombre}</p></div>
-          <div><p className="text-slate-500">Fecha programada</p><p className="font-medium">{format(new Date(mant.fechaProgramada), 'dd MMM yyyy', { locale: es })}</p></div>
-          <div><p className="text-slate-500">Costo</p><p className="font-medium">{mant.costo ? `$${Number(mant.costo).toLocaleString('es-CO')}` : '—'}</p></div>
-          {mant.fechaInicio && <div><p className="text-slate-500">Inicio</p><p className="font-medium">{format(new Date(mant.fechaInicio), 'dd MMM yyyy', { locale: es })}</p></div>}
-          {mant.fechaFin && <div><p className="text-slate-500">Fin</p><p className="font-medium">{format(new Date(mant.fechaFin), 'dd MMM yyyy', { locale: es })}</p></div>}
+          <div><p className="text-zinc-400">Equipo</p><p className="font-medium">{mant.equipo.nombre}</p></div>
+          <div><p className="text-zinc-400">Responsable</p><p className="font-medium">{mant.responsable.nombre}</p></div>
+          <div><p className="text-zinc-400">Fecha programada</p><p className="font-medium">{format(new Date(mant.fechaProgramada), 'dd MMM yyyy', { locale: es })}</p></div>
+          <div><p className="text-zinc-400">Costo</p><p className="font-medium">{mant.costo ? `$${Number(mant.costo).toLocaleString('es-CO')}` : '—'}</p></div>
+          {mant.fechaInicio && <div><p className="text-zinc-400">Inicio</p><p className="font-medium">{format(new Date(mant.fechaInicio), 'dd MMM yyyy', { locale: es })}</p></div>}
+          {mant.fechaFin && <div><p className="text-zinc-400">Fin</p><p className="font-medium">{format(new Date(mant.fechaFin), 'dd MMM yyyy', { locale: es })}</p></div>}
         </div>
-        {mant.actividades && <div><p className="text-slate-500 text-sm">Actividades</p><p className="text-sm mt-1 bg-slate-50 rounded-lg p-3 whitespace-pre-line">{mant.actividades}</p></div>}
-        {mant.observaciones && <div><p className="text-slate-500 text-sm">Observaciones</p><p className="text-sm mt-1 bg-slate-50 rounded-lg p-3">{mant.observaciones}</p></div>}
-        {mant.falla && <div className="text-sm bg-orange-50 rounded-lg p-3"><p className="text-slate-500">Falla relacionada</p><p className="font-medium text-orange-700">{mant.falla.titulo}</p></div>}
-        <div className="border-t border-slate-100 pt-4">
+        {mant.actividades && <div><p className="text-zinc-400 text-sm">Actividades</p><p className="text-sm mt-1 bg-ink rounded-lg p-3 whitespace-pre-line">{mant.actividades}</p></div>}
+        {mant.observaciones && <div><p className="text-zinc-400 text-sm">Observaciones</p><p className="text-sm mt-1 bg-ink rounded-lg p-3">{mant.observaciones}</p></div>}
+        {mant.falla && <div className="text-sm bg-orange-400/10 rounded-lg p-3"><p className="text-zinc-400">Falla relacionada</p><p className="font-medium text-orange-300">{mant.falla.titulo}</p></div>}
+        <div className="border-t border-zinc-800 pt-4">
           <label className="label">Cambiar estado</label>
           <div className="flex gap-3">
             <select value={nuevoEstado} onChange={(e) => setNuevoEstado(e.target.value as EstadoMantenimiento)} className="input flex-1">
@@ -229,8 +229,8 @@ export default function MantenimientosPage() {
 
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mantenimientos</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{mantenimientos.length} registro{mantenimientos.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Mantenimientos</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">{mantenimientos.length} registro{mantenimientos.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => setSlideover(true)} className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" /> Programar mantenimiento
@@ -239,9 +239,9 @@ export default function MantenimientosPage() {
 
       {/* Banner vencidos */}
       {vencidos > 0 && !tab && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
-          <p className="text-sm text-red-700">
+        <div className="bg-red-400/10 border border-red-400/25 rounded-xl px-4 py-3 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+          <p className="text-sm text-red-400">
             <span className="font-semibold">{vencidos} mantenimiento{vencidos !== 1 ? 's' : ''} vencido{vencidos !== 1 ? 's' : ''}.</span>{' '}
             <button onClick={() => setTab('vencido')} className="underline hover:no-underline">Ver vencidos</button>
           </p>
@@ -249,15 +249,15 @@ export default function MantenimientosPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-slate-200">
+      <div className="flex gap-1 border-b border-line">
         {TABS.map((t) => (
           <button
             key={t.value}
             onClick={() => setTab(t.value)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               tab === t.value
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-brand text-brand'
+                : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
             {t.label}
@@ -268,7 +268,7 @@ export default function MantenimientosPage() {
       {/* Filtros */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input type="text" placeholder="Buscar por título..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
         </div>
         <select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} className="input w-auto">
@@ -280,7 +280,7 @@ export default function MantenimientosPage() {
 
       {/* Tabla */}
       <div className="card overflow-hidden">
-        {isError ? <div role="alert" className="p-6 text-red-600">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
+        {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : mantenimientos.length === 0 ? (
           <EmptyState icon={<Wrench className="w-14 h-14" />} title="Sin mantenimientos" description="Programa el primer mantenimiento." action={<button onClick={() => setSlideover(true)} className="btn-primary">+ Programar</button>} />
@@ -288,37 +288,37 @@ export default function MantenimientosPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+                <tr className="border-b border-line bg-ink">
                   {['Título', 'Equipo', 'Tipo', 'Estado', 'Responsable', 'Fecha programada', 'Costo', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-slate-500 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-zinc-800">
                 {pagination.visible.map((m) => {
                   const fecha = new Date(m.fechaProgramada);
                   const vencido = m.estado === 'programado' && isPast(fecha);
                   const diasDiff = differenceInDays(fecha, new Date());
                   return (
-                    <tr key={m.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-slate-800">{m.titulo}</td>
-                      <td className="px-4 py-3 text-slate-600">{m.equipo.nombre}</td>
+                    <tr key={m.id} className="hover:bg-ink transition-colors">
+                      <td className="px-4 py-3 font-medium text-zinc-100">{m.titulo}</td>
+                      <td className="px-4 py-3 text-zinc-300">{m.equipo.nombre}</td>
                       <td className="px-4 py-3"><span className={`badge ${tipoMantColor[m.tipo]}`}>{m.tipo}</span></td>
                       <td className="px-4 py-3"><span className={`badge ${estadoMantColor[m.estado]}`}>{m.estado.replace('_', ' ')}</span></td>
-                      <td className="px-4 py-3 text-slate-600">{m.responsable.nombre}</td>
+                      <td className="px-4 py-3 text-zinc-300">{m.responsable.nombre}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium ${vencido ? 'text-red-600' : diasDiff <= 3 ? 'text-yellow-600' : 'text-slate-600'}`}>
+                        <span className={`text-xs font-medium ${vencido ? 'text-red-400' : diasDiff <= 3 ? 'text-brand' : 'text-zinc-300'}`}>
                           {format(fecha, 'dd MMM yyyy', { locale: es })}
-                          {vencido && <span className="ml-1 text-red-500">⚠</span>}
+                          {vencido && <span className="ml-1 text-red-400">⚠</span>}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 text-xs">
+                      <td className="px-4 py-3 text-zinc-300 text-xs">
                         {m.costo ? `$${Number(m.costo).toLocaleString('es-CO')}` : '—'}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">
-                          <button onClick={() => setDetalle(m)} className="p-1.5 rounded text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Ver detalle">👁</button>
-                          <button onClick={() => setEditando(m)} className="p-1.5 rounded text-slate-400 hover:bg-slate-100 transition-colors" title="Editar">✏️</button>
+                          <button onClick={() => setDetalle(m)} className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-brand transition-colors" title="Ver detalle">👁</button>
+                          <button onClick={() => setEditando(m)} className="p-1.5 rounded text-zinc-400 hover:bg-raised transition-colors" title="Editar">✏️</button>
                         </div>
                       </td>
                     </tr>

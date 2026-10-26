@@ -17,23 +17,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 // ─── Helpers ────────────────────────────────────
 const prioridadColor: Record<PrioridadFalla, string> = {
-  baja: 'bg-slate-100 text-slate-600',
-  media: 'bg-yellow-100 text-yellow-700',
-  alta: 'bg-orange-100 text-orange-700',
-  critica: 'bg-red-100 text-red-700',
+  baja: 'bg-raised text-zinc-300',
+  media: 'bg-brand/15 text-brand',
+  alta: 'bg-orange-400/15 text-orange-300',
+  critica: 'bg-red-400/10 text-red-400',
 };
 const estadoFallaColor: Record<EstadoFalla, string> = {
-  abierta: 'bg-blue-100 text-blue-700',
-  en_proceso: 'bg-yellow-100 text-yellow-700',
-  resuelta: 'bg-green-100 text-green-700',
-  cerrada: 'bg-slate-100 text-slate-500',
+  abierta: 'bg-brand/15 text-brand',
+  en_proceso: 'bg-brand/15 text-brand',
+  resuelta: 'bg-emerald-400/10 text-emerald-400',
+  cerrada: 'bg-raised text-zinc-400',
 };
 const categoriaColor: Record<CategoriaFalla, string> = {
-  hardware: 'bg-orange-100 text-orange-700',
-  software: 'bg-blue-100 text-blue-700',
-  red: 'bg-purple-100 text-purple-700',
-  perifericos: 'bg-teal-100 text-teal-700',
-  otro: 'bg-slate-100 text-slate-600',
+  hardware: 'bg-orange-400/15 text-orange-300',
+  software: 'bg-brand/15 text-brand',
+  red: 'bg-zinc-700/50 text-zinc-300',
+  perifericos: 'bg-emerald-400/10 text-emerald-400',
+  otro: 'bg-raised text-zinc-300',
 };
 
 // ─── Schema ──────────────────────────────────────
@@ -83,17 +83,17 @@ function FallaForm({ falla, onClose }: { falla?: Falla; onClose: () => void }) {
           <option value="">Seleccionar equipo...</option>
           {equipos.map((e: { id: string; nombre: string }) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
         </select>
-        {errors.equipoId && <p className="text-xs text-red-500 mt-1">{errors.equipoId.message}</p>}
+        {errors.equipoId && <p className="text-xs text-red-400 mt-1">{errors.equipoId.message}</p>}
       </div>
       <div>
         <label className="label">Título *</label>
         <input {...register('titulo')} className="input" placeholder="Ej: Pantalla no enciende" />
-        {errors.titulo && <p className="text-xs text-red-500 mt-1">{errors.titulo.message}</p>}
+        {errors.titulo && <p className="text-xs text-red-400 mt-1">{errors.titulo.message}</p>}
       </div>
       <div>
         <label className="label">Descripción *</label>
         <textarea {...register('descripcion')} rows={3} className="input resize-none" placeholder="Describe el problema en detalle..." />
-        {errors.descripcion && <p className="text-xs text-red-500 mt-1">{errors.descripcion.message}</p>}
+        {errors.descripcion && <p className="text-xs text-red-400 mt-1">{errors.descripcion.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -162,15 +162,15 @@ function DetalleModal({ falla, onClose }: { falla: Falla; onClose: () => void })
           <span className={`badge ${categoriaColor[falla.categoria]}`}>{falla.categoria}</span>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div><p className="text-slate-500">Equipo</p><p className="font-medium">{falla.equipo.nombre}</p></div>
-          <div><p className="text-slate-500">Reportado por</p><p className="font-medium">{falla.reportador.nombre}</p></div>
-          <div><p className="text-slate-500">Técnico</p><p className="font-medium">{falla.tecnico?.nombre ?? '—'}</p></div>
-          <div><p className="text-slate-500">Fecha reporte</p><p className="font-medium">{format(new Date(falla.fechaReporte), 'dd MMM yyyy', { locale: es })}</p></div>
+          <div><p className="text-zinc-400">Equipo</p><p className="font-medium">{falla.equipo.nombre}</p></div>
+          <div><p className="text-zinc-400">Reportado por</p><p className="font-medium">{falla.reportador.nombre}</p></div>
+          <div><p className="text-zinc-400">Técnico</p><p className="font-medium">{falla.tecnico?.nombre ?? '—'}</p></div>
+          <div><p className="text-zinc-400">Fecha reporte</p><p className="font-medium">{format(new Date(falla.fechaReporte), 'dd MMM yyyy', { locale: es })}</p></div>
         </div>
-        <div><p className="text-slate-500 text-sm">Descripción</p><p className="text-sm mt-1 bg-slate-50 rounded-lg p-3">{falla.descripcion}</p></div>
-        {falla.diagnostico && <div><p className="text-slate-500 text-sm">Diagnóstico</p><p className="text-sm mt-1 bg-slate-50 rounded-lg p-3">{falla.diagnostico}</p></div>}
-        {falla.solucionAplicada && <div><p className="text-slate-500 text-sm">Solución aplicada</p><p className="text-sm mt-1 bg-green-50 rounded-lg p-3">{falla.solucionAplicada}</p></div>}
-        <div className="border-t border-slate-100 pt-4">
+        <div><p className="text-zinc-400 text-sm">Descripción</p><p className="text-sm mt-1 bg-ink rounded-lg p-3">{falla.descripcion}</p></div>
+        {falla.diagnostico && <div><p className="text-zinc-400 text-sm">Diagnóstico</p><p className="text-sm mt-1 bg-ink rounded-lg p-3">{falla.diagnostico}</p></div>}
+        {falla.solucionAplicada && <div><p className="text-zinc-400 text-sm">Solución aplicada</p><p className="text-sm mt-1 bg-emerald-400/10 rounded-lg p-3">{falla.solucionAplicada}</p></div>}
+        <div className="border-t border-zinc-800 pt-4">
           <label className="label">Cambiar estado</label>
           <div className="flex gap-3">
             <select value={nuevoEstado} onChange={(e) => setNuevoEstado(e.target.value as EstadoFalla)} className="input flex-1">
@@ -220,8 +220,8 @@ export default function FallasPage() {
 
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Fallas</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{fallas.length} falla{fallas.length !== 1 ? 's' : ''} registrada{fallas.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Fallas</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">{fallas.length} falla{fallas.length !== 1 ? 's' : ''} registrada{fallas.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => setSlideover(true)} className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" /> Reportar falla
@@ -230,7 +230,7 @@ export default function FallasPage() {
 
       <div className="card p-4 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input type="text" placeholder="Buscar por título..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
         </div>
         <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} className="input w-auto">
@@ -258,7 +258,7 @@ export default function FallasPage() {
       </div>
 
       <div className="card overflow-hidden">
-        {isError ? <div role="alert" className="p-6 text-red-600">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
+        {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : fallas.length === 0 ? (
           <EmptyState icon={<AlertTriangle className="w-14 h-14" />} title="Sin fallas registradas" description="Reporta la primera falla para comenzar el seguimiento." action={<button onClick={() => setSlideover(true)} className="btn-primary">+ Reportar falla</button>} />
@@ -266,29 +266,29 @@ export default function FallasPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+                <tr className="border-b border-line bg-ink">
                   {['Título', 'Equipo', 'Prioridad', 'Estado', 'Reportado por', 'Técnico', 'Fecha', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-slate-500 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-zinc-800">
                 {pagination.visible.map((f) => (
-                  <tr key={f.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={f.id} className="hover:bg-ink transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-slate-800">{f.titulo}</p>
+                      <p className="font-medium text-zinc-100">{f.titulo}</p>
                       <span className={`badge mt-1 ${categoriaColor[f.categoria]}`}>{f.categoria}</span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{f.equipo.nombre}</td>
+                    <td className="px-4 py-3 text-zinc-300">{f.equipo.nombre}</td>
                     <td className="px-4 py-3"><span className={`badge ${prioridadColor[f.prioridad]}`}>{f.prioridad}</span></td>
                     <td className="px-4 py-3"><span className={`badge ${estadoFallaColor[f.estado]}`}>{f.estado.replace('_', ' ')}</span></td>
-                    <td className="px-4 py-3 text-slate-600">{f.reportador.nombre}</td>
-                    <td className="px-4 py-3 text-slate-600">{f.tecnico?.nombre ?? <span className="text-slate-300">—</span>}</td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{format(new Date(f.fechaReporte), 'dd MMM yyyy', { locale: es })}</td>
+                    <td className="px-4 py-3 text-zinc-300">{f.reportador.nombre}</td>
+                    <td className="px-4 py-3 text-zinc-300">{f.tecnico?.nombre ?? <span className="text-zinc-400">—</span>}</td>
+                    <td className="px-4 py-3 text-xs text-zinc-400">{format(new Date(f.fechaReporte), 'dd MMM yyyy', { locale: es })}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
-                        <button onClick={() => setDetalle(f)} className="p-1.5 rounded text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Ver detalle"><AlertTriangle className="w-4 h-4" /></button>
-                        <button onClick={() => setEditando(f)} className="p-1.5 rounded text-slate-400 hover:bg-slate-100 transition-colors" title="Editar">✏️</button>
+                        <button onClick={() => setDetalle(f)} className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-brand transition-colors" title="Ver detalle"><AlertTriangle className="w-4 h-4" /></button>
+                        <button onClick={() => setEditando(f)} className="p-1.5 rounded text-zinc-400 hover:bg-raised transition-colors" title="Editar">✏️</button>
                       </div>
                     </td>
                   </tr>

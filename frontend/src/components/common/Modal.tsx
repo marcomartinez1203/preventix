@@ -35,18 +35,18 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div
         ref={dialogRef} role="dialog" aria-modal="true" aria-label={title}
-        className={`relative bg-white rounded-xl shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
+        className={`relative bg-surface border border-line rounded-2xl shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line">
+          <h2 className="text-lg font-semibold text-zinc-100">{title}</h2>
           <button
             aria-label="Cerrar" onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:bg-raised hover:text-zinc-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

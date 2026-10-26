@@ -35,7 +35,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Suspense fallback={<div className="p-8 text-slate-500" role="status">Cargando…</div>}>
+        <Suspense fallback={<div className="p-8 text-zinc-400" role="status">Cargando…</div>}>
         <Routes>
           {/* Rutas públicas */}
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />

@@ -22,16 +22,16 @@ const tipoIcono: Record<TipoEquipo, React.ElementType> = {
   desktop: Monitor, laptop: Laptop, servidor: Server, otro: HelpCircle,
 };
 const tipoColor: Record<TipoEquipo, string> = {
-  desktop: 'bg-blue-100 text-blue-700',
-  laptop: 'bg-indigo-100 text-indigo-700',
-  servidor: 'bg-violet-100 text-violet-700',
-  otro: 'bg-slate-100 text-slate-600',
+  desktop: 'bg-brand/15 text-brand',
+  laptop: 'bg-brand/10 text-brand',
+  servidor: 'bg-zinc-700/50 text-zinc-300',
+  otro: 'bg-raised text-zinc-300',
 };
 const estadoColor: Record<EstadoEquipo, string> = {
-  activo: 'bg-green-100 text-green-700',
-  en_mantenimiento: 'bg-yellow-100 text-yellow-700',
-  fuera_servicio: 'bg-red-100 text-red-700',
-  archivado: 'bg-slate-100 text-slate-500',
+  activo: 'bg-emerald-400/10 text-emerald-400',
+  en_mantenimiento: 'bg-brand/15 text-brand',
+  fuera_servicio: 'bg-red-400/10 text-red-400',
+  archivado: 'bg-raised text-zinc-400',
 };
 const estadoLabel: Record<EstadoEquipo, string> = {
   activo: 'Activo', en_mantenimiento: 'En mantenimiento',
@@ -67,22 +67,22 @@ function HistorialModal({ equipo, onClose }: { equipo: Equipo; onClose: () => vo
   return (
     <Modal open onClose={onClose} title={`Historial · ${equipo.nombre}`} size="lg">
       {isLoading ? (
-        <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="animate-pulse h-12 bg-slate-100 rounded" />)}</div>
+        <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="animate-pulse h-12 bg-raised rounded" />)}</div>
       ) : historial.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-8">Sin registros de historial</p>
+        <p className="text-sm text-zinc-400 text-center py-8">Sin registros de historial</p>
       ) : (
         <div className="relative">
-          <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-200" />
+          <div className="absolute left-4 top-0 bottom-0 w-px bg-zinc-800" />
           <div className="space-y-4 ml-10">
             {historial.map((h) => (
               <div key={h.id} className="relative">
-                <div className="absolute -left-[2.35rem] w-3 h-3 bg-blue-500 rounded-full border-2 border-white" />
+                <div className="absolute -left-[2.35rem] w-3 h-3 bg-brand rounded-full border-2 border-white" />
                 <div className="card p-3">
-                  <p className="text-sm font-medium text-slate-700">{h.descripcion}</p>
+                  <p className="text-sm font-medium text-zinc-200">{h.descripcion}</p>
                   <div className="flex gap-3 mt-1">
-                    <span className="text-xs text-slate-400">{h.usuario.nombre}</span>
-                    <span className="text-xs text-slate-300">·</span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-zinc-400">{h.usuario.nombre}</span>
+                    <span className="text-xs text-zinc-400">·</span>
+                    <span className="text-xs text-zinc-400">
                       {format(new Date(h.createdAt), 'dd MMM yyyy HH:mm', { locale: es })}
                     </span>
                   </div>
@@ -142,7 +142,7 @@ function EquipoForm({
     <div>
       <label className="label">{label}</label>
       <input type={type} {...register(key)} className="input" {...opts} />
-      {errors[key] && <p className="text-xs text-red-500 mt-1">{errors[key]?.message as string}</p>}
+      {errors[key] && <p className="text-xs text-red-400 mt-1">{errors[key]?.message as string}</p>}
     </div>
   );
 
@@ -258,8 +258,8 @@ export default function EquiposPage() {
       {/* Header */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Equipos</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{equipos.length} equipo{equipos.length !== 1 ? 's' : ''} registrado{equipos.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Equipos</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">{equipos.length} equipo{equipos.length !== 1 ? 's' : ''} registrado{equipos.length !== 1 ? 's' : ''}</p>
         </div>
         {puedeEditar && (
           <button onClick={() => setSlideover('create')} className="btn-primary flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function EquiposPage() {
       {/* Filtros */}
       <div className="card p-4 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input
             type="text" placeholder="Buscar por nombre o serie..."
             value={search} onChange={(e) => setSearch(e.target.value)}
@@ -296,7 +296,7 @@ export default function EquiposPage() {
 
       {/* Tabla */}
       <div className="card overflow-hidden">
-        {isError ? <div role="alert" className="p-6 text-red-600">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
+        {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : equipos.length === 0 ? (
           <EmptyState
@@ -308,42 +308,42 @@ export default function EquiposPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
+                <tr className="border-b border-line bg-ink">
                   {['Equipo', 'Marca / Modelo', 'Sede', 'Responsable', 'Estado', 'Adquisición', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-slate-500 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-zinc-800">
                 {pagination.visible.map((eq) => {
                   const TipoIcon = tipoIcono[eq.tipo] ?? HelpCircle;
                   return (
-                    <tr key={eq.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={eq.id} className="hover:bg-ink transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className={`p-1.5 rounded-lg ${tipoColor[eq.tipo]}`}>
                             <TipoIcon className="w-4 h-4" />
                           </div>
                           <div>
-                            <Link to={`/equipos/${eq.id}`} className="font-medium text-blue-700 hover:underline">{eq.nombre}</Link>
-                            {eq.numeroSerie && <p className="text-xs text-slate-400">S/N: {eq.numeroSerie}</p>}
+                            <Link to={`/equipos/${eq.id}`} className="font-medium text-brand hover:underline">{eq.nombre}</Link>
+                            {eq.numeroSerie && <p className="text-xs text-zinc-400">S/N: {eq.numeroSerie}</p>}
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        {eq.marca || eq.modelo ? `${eq.marca ?? ''} ${eq.modelo ?? ''}`.trim() : <span className="text-slate-300">—</span>}
+                      <td className="px-4 py-3 text-zinc-300">
+                        {eq.marca || eq.modelo ? `${eq.marca ?? ''} ${eq.modelo ?? ''}`.trim() : <span className="text-zinc-400">—</span>}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        {eq.sede?.nombre ?? <span className="text-slate-300">—</span>}
-                        {eq.ubicacion && <p className="text-xs text-slate-400">{eq.ubicacion.nombre}</p>}
+                      <td className="px-4 py-3 text-zinc-300">
+                        {eq.sede?.nombre ?? <span className="text-zinc-400">—</span>}
+                        {eq.ubicacion && <p className="text-xs text-zinc-400">{eq.ubicacion.nombre}</p>}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        {eq.responsable?.nombre ?? <span className="text-slate-300">—</span>}
+                      <td className="px-4 py-3 text-zinc-300">
+                        {eq.responsable?.nombre ?? <span className="text-zinc-400">—</span>}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`badge ${estadoColor[eq.estado]}`}>{estadoLabel[eq.estado]}</span>
                       </td>
-                      <td className="px-4 py-3 text-slate-500 text-xs">
+                      <td className="px-4 py-3 text-zinc-400 text-xs">
                         {eq.fechaAdquisicion ? format(new Date(eq.fechaAdquisicion), 'dd MMM yyyy', { locale: es }) : '—'}
                       </td>
                       <td className="px-4 py-3">
@@ -351,7 +351,7 @@ export default function EquiposPage() {
                           <button
                             onClick={() => setHistorialEquipo(eq)}
                             title="Ver historial"
-                            className="p-1.5 rounded text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors"
+                            className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-brand transition-colors"
                           >
                             <Clock className="w-4 h-4" />
                           </button>
@@ -360,7 +360,7 @@ export default function EquiposPage() {
                               <button
                                 onClick={() => { setSelected(eq); setSlideover('edit'); }}
                                 title="Editar"
-                                className="p-1.5 rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                                className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-zinc-200 transition-colors"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
@@ -368,7 +368,7 @@ export default function EquiposPage() {
                                 <button
                                   onClick={() => { if (window.confirm(`¿Archivar ${eq.nombre}? Podrás recuperarlo desde el filtro Archivados.`)) archivar.mutate(eq.id); }}
                                   title="Archivar"
-                                  className="p-1.5 rounded text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                  className="p-1.5 rounded text-zinc-400 hover:bg-red-400/10 hover:text-red-400 transition-colors"
                                 >
                                   <Archive className="w-4 h-4" />
                                 </button>

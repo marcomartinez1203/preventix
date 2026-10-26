@@ -1,9 +1,18 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand: #ffd400;
+  --color-brand-hover: #ffe34d;
+  --color-ink: #0d0d0f;
+  --color-surface: #19191d;
+  --color-raised: #232328;
+  --color-line: #34343b;
+}
+
 @layer base {
   :root {
-    --color-primary: 59 130 246;
-    --color-secondary: 100 116 139;
+    color-scheme: dark;
+    --color-primary: 255 212 0;
   }
 
   * {
@@ -11,31 +20,70 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-ink text-zinc-100 antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:not(:disabled), summary, select { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--color-brand); outline-offset: 4px; }
+  ::selection { background: var(--color-brand); color: var(--color-ink); }
+  input::placeholder, textarea::placeholder { color: #85858f; }
+  input::-webkit-calendar-picker-indicator { opacity: .75; }
+  input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #131316 inset; -webkit-text-fill-color: #f4f4f5; caret-color: #ffd400; }
+  * { scrollbar-width: thin; scrollbar-color: #414149 #101012; }
+  h1, h2, h3 { text-wrap: balance; }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-brand hover:bg-brand-hover text-ink font-semibold px-4 py-2.5 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow: 0 3px 15px #ffd40012;
   }
   .btn-secondary {
-    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+    @apply bg-raised hover:bg-zinc-700 text-zinc-100 border border-line font-medium px-4 py-2.5 rounded-xl transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
   }
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+    @apply bg-red-600 hover:bg-red-500 text-white font-medium px-4 py-2.5 rounded-xl transition-colors duration-200;
   }
   .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+    @apply bg-surface rounded-2xl border border-line;
+    box-shadow: 0 6px 24px #00000012;
   }
   .input {
-    @apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+    @apply w-full bg-ink text-zinc-100 px-3.5 py-2.5 border border-line rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-colors;
+    min-height: 44px;
   }
   .label {
-    @apply block text-sm font-medium text-slate-700 mb-1;
+    @apply block text-sm font-medium text-zinc-300 mb-1.5;
   }
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium;
+  }
+
+  .brand-logo { display: inline-block; width: 184px; height: 152px; overflow: hidden; border-radius: 14px; background: #fff; flex-shrink: 0; }
+  .brand-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .brand-logo-mark { display: inline-block; position: relative; overflow: hidden; width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px; background: #fff; }
+  .brand-logo-mark img { position: absolute; width: 184%; max-width: none; height: auto; left: -42%; top: -19%; }
+  .eyebrow { @apply text-[11px] uppercase font-semibold tracking-[0.18em] text-brand; }
+  .auth-page { background: radial-gradient(ellipse at 14% 15%, #ffd4000b, transparent 52%), #0d0d0f; }
+  .auth-card { border-top: 3px solid var(--color-brand); box-shadow: 0 28px 90px #00000055; }
+  .dashboard-hero { background: linear-gradient(110deg, #20201d, #171719 70%); }
+  .kpi-card { position: relative; overflow: hidden; transition: border-color .2s, transform .2s; }
+  .kpi-card:hover { border-color: #ffd40066; transform: translateY(-2px); }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 24px; width: 32px; height: 3px; background: var(--color-brand); border-radius: 0 0 4px 4px; }
+  .safety-stripe { background: repeating-linear-gradient(135deg, #ffd400 0 12px, #19191d 12px 24px); height: 4px; }
+  .peer:focus-visible + div { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+  .workspace-main > div { animation: enter-page .25s ease-out; }
+  table th { white-space: nowrap; }
+  table td { vertical-align: middle; }
+  @keyframes enter-page { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) {
+    .workspace-main > div { animation: none; }
+    .kpi-card { transition: none; }
+    .kpi-card:hover { transform: none; }
   }
 }
