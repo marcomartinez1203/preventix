@@ -22,12 +22,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 const tipoIcono: Record<TipoEquipo, React.ElementType> = {
   desktop: Monitor, laptop: Laptop, servidor: Server, otro: HelpCircle,
 };
-const tipoColor: Record<TipoEquipo, string> = {
-  desktop: 'bg-brand/15 text-brand',
-  laptop: 'bg-brand/10 text-brand',
-  servidor: 'bg-zinc-700/50 text-zinc-300',
-  otro: 'bg-raised text-zinc-300',
-};
 const estadoColor: Record<EstadoEquipo, string> = {
   activo: 'bg-emerald-400/10 text-emerald-400',
   en_mantenimiento: 'bg-brand/15 text-brand',
@@ -347,8 +341,8 @@ export default function EquiposPage() {
             <table className="w-full text-sm"><caption className="sr-only">Inventario de equipos</caption>
               <thead>
                 <tr className="border-b border-line bg-ink">
-                  {['Equipo', 'Marca / Modelo', 'Sede', 'Responsable', 'Estado', 'Adquisición', 'Acciones'].map((h) => (
-                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                  {['Equipo', 'Marca / Modelo', 'Sede', 'Responsable', 'Estado', 'Entre fallas', 'Adquisición', 'Acciones'].map((h) => (
+                    <th scope="col" key={h} className="text-left text-xs font-medium text-zinc-400 px-4 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -359,11 +353,11 @@ export default function EquiposPage() {
                     <tr key={eq.id} className="hover:bg-ink transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className={`p-1.5 rounded-lg ${tipoColor[eq.tipo]}`}>
+                          <div className="text-zinc-400 shrink-0">
                             <TipoIcon className="w-4 h-4" />
                           </div>
                           <div>
-                            <Link to={`/equipos/${eq.id}`} className="font-medium text-brand hover:underline">{eq.nombre}</Link>
+                            <Link to={`/equipos/${eq.id}`} className="font-medium text-zinc-100 hover:underline">{eq.nombre}</Link>
                             {eq.numeroSerie && <p className="text-xs text-zinc-400">S/N: {eq.numeroSerie}</p>}
                           </div>
                         </div>

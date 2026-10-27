@@ -267,7 +267,7 @@ export default function MantenimientosPage() {
             onClick={() => setTab(t.value)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               tab === t.value
-                ? 'border-brand text-brand'
+                ? 'border-zinc-100 text-zinc-100'
                 : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
@@ -306,7 +306,7 @@ export default function MantenimientosPage() {
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Título', 'Equipo', 'Tipo', 'Estado', 'Responsable', 'Fecha programada', 'Costo', 'Acciones'].map((h) => (
-                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className={`${h === 'Costo' ? 'text-right' : 'text-left'} text-xs font-medium text-zinc-400 px-4 py-3`}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -325,11 +325,11 @@ export default function MantenimientosPage() {
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium ${vencido ? 'text-red-400' : diasDiff <= 3 ? 'text-brand' : 'text-zinc-300'}`}>
                           {format(fecha, 'dd MMM yyyy', { locale: es })}
-                          {vencido && <span className="ml-1 text-red-400">⚠</span>}
+                          {vencido && <AlertCircle aria-label="Fecha vencida" className="inline ml-1 w-3.5 h-3.5 text-red-400" />}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-zinc-300 text-xs">
-                        {m.costo ? `$${Number(m.costo).toLocaleString('es-CO')}` : '—'}
+                      <td className="px-4 py-3 text-zinc-300 text-xs text-right tabular-nums">
+                        {m.costo != null ? `$${Number(m.costo).toLocaleString('es-CO')}` : '—'}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">{actions(m)}</div>

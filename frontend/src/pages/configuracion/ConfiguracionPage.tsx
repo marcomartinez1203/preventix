@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Settings2, MapPin, ChevronDown, ChevronRight, Plus } from 'lucide-react';
+import { Building2, Settings2, MapPin, ChevronDown, ChevronRight, Plus, LockKeyhole } from 'lucide-react';
 import { empresaApi, sedesApi } from '../../api';
 import { useAuthStore } from '../../stores/authStore';
 import Modal from '../../components/common/Modal';
@@ -95,9 +95,9 @@ function TabConfig() {
           <p className="text-xs text-zinc-400">Preferencia guardada; la demo no envía correos</p>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" {...register('notifEmail')} className="sr-only peer" />
+          <input aria-label="Notificaciones por email" type="checkbox" {...register('notifEmail')} className="sr-only peer" />
           <div className="w-10 h-6 bg-zinc-600 peer-checked:bg-brand rounded-full transition-colors" />
-          <div className="absolute left-1 top-1 w-4 h-4 bg-zinc-200 rounded-full shadow transition-transform peer-checked:translate-x-4" />
+          <div className="absolute left-1 top-1 w-4 h-4 bg-zinc-200 rounded-full transition-transform peer-checked:translate-x-4" />
         </label>
       </div>
       <div>
@@ -243,7 +243,7 @@ export default function ConfiguracionPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-2xl mb-2">🔒</p>
+          <LockKeyhole className="w-6 h-6 mb-3 mx-auto text-zinc-400" aria-hidden="true" />
           <p className="text-lg font-medium text-zinc-200">Acceso restringido</p>
           <p className="text-sm text-zinc-400 mt-1">Solo administradores pueden acceder a configuración</p>
         </div>
@@ -257,15 +257,15 @@ export default function ConfiguracionPage() {
         <h1 className="text-2xl font-bold text-zinc-100">Configuración</h1>
         <p className="text-zinc-400 text-sm mt-0.5">Administra los datos de tu empresa y preferencias</p>
       </div>
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Tabs laterales */}
-        <div className="lg:w-48 shrink-0 space-y-1">
+      <div className="space-y-7">
+        <div role="group" aria-label="Secciones de configuración" className="flex flex-wrap gap-5 border-b border-line">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
+              aria-pressed={tab === id}
               onClick={() => setTab(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                tab === id ? 'bg-brand/10 text-brand' : 'text-zinc-300 hover:bg-raised'
+              className={`flex items-center gap-2 py-3 min-h-11 border-b-2 text-sm font-medium transition-colors ${
+                tab === id ? 'border-zinc-100 text-zinc-100' : 'border-transparent text-zinc-400 hover:text-white'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -274,10 +274,13 @@ export default function ConfiguracionPage() {
           ))}
         </div>
         {/* Contenido */}
-        <div className="flex-1 card p-6">
-          {tab === 'empresa' && <TabEmpresa />}
-          {tab === 'general' && <TabConfig />}
-          {tab === 'sedes' && <TabSedes />}
+        <div className="settings-section">
+          <div className="settings-copy"><h2>{tab === 'empresa' ? 'Datos de la empresa' : tab === 'general' ? 'Preferencias de trabajo' : 'Dónde están tus equipos'}</h2><p>{tab === 'empresa' ? 'La información de contacto y la identidad de tu organización.' : tab === 'general' ? 'Define los avisos de mantenimiento, la zona horaria y la moneda de tu empresa.' : 'Organiza el inventario por sedes y ubicaciones para encontrar cada equipo.'}</p></div>
+          <div className="card">
+            {tab === 'empresa' && <TabEmpresa />}
+            {tab === 'general' && <TabConfig />}
+            {tab === 'sedes' && <TabSedes />}
+          </div>
         </div>
       </div>
     </div>

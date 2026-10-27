@@ -26,7 +26,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
       data-modal-root className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/70" />
       <div
         ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title}
         className={`dialog-panel relative border border-line rounded-2xl shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}

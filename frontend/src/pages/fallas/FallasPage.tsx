@@ -279,7 +279,7 @@ export default function FallasPage() {
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Título', 'Equipo', 'Prioridad', 'Estado', 'Reportado por', 'Técnico', 'Fecha', 'Acciones'].map((h) => (
-                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left text-xs font-medium text-zinc-400 px-4 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>

@@ -23,7 +23,7 @@ export default function SlideOver({ open, onClose, title, children, width = 'lg'
   return (
     <div data-modal-root className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       {/* Panel */}
       <div
         ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title}

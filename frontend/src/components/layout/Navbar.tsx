@@ -50,8 +50,8 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
   }, []);
 
   return (
-    <header className="workspace-header bg-surface border-b border-line flex items-center justify-between px-4 md:px-7 gap-3 shrink-0">
-      <div className="flex items-center gap-3 min-w-0"><button className="icon-button md:hidden -ml-2" aria-label="Abrir menú" onClick={onMenu}><Menu className="w-5 h-5" /></button><div className="md:hidden"><BrandLogo compact /></div><div className="min-w-0"><p className="text-sm font-medium text-zinc-100 truncate">{section}</p></div></div>
+    <header className="workspace-header bg-ink border-b border-line flex items-center justify-between px-4 sm:px-7 gap-3 shrink-0">
+      <div className="flex items-center gap-3 min-w-0"><button className="icon-button mobile-menu-button -ml-2" aria-label="Abrir menú" onClick={onMenu}><Menu className="w-5 h-5" /></button><div className="mobile-menu-button"><BrandLogo compact /></div><div className="min-w-0"><p className="text-sm text-zinc-400 truncate">{section}</p></div></div>
       <div className="flex items-center gap-4">
         {/* Campana */}
         <div ref={ref} className="relative">
@@ -61,7 +61,7 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
           >
             <Bell className="w-5 h-5" />
             {noLeidas > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-0 right-0 min-w-4 h-4 px-0.5 bg-brand text-ink text-[11px] font-semibold rounded-full flex items-center justify-center">
                 {noLeidas > 9 ? '9+' : noLeidas}
               </span>
             )}
@@ -116,7 +116,7 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
 
         {/* Usuario */}
         <Link to="/perfil" aria-label="Mi perfil" className="flex items-center gap-2 rounded-xl min-h-11 min-w-11 justify-center">
-          <div className="w-8 h-8 bg-brand rounded-xl flex items-center justify-center text-ink text-sm font-semibold">
+          <div className="w-8 h-8 bg-raised rounded-full flex items-center justify-center text-zinc-200 text-sm font-semibold">
             {usuario?.nombre?.charAt(0).toUpperCase()}
           </div>
           <div className="hidden sm:block">

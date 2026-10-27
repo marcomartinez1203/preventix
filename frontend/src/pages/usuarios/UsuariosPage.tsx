@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, UserCheck, UserX } from 'lucide-react';
+import { Plus, UserCheck, UserX, LockKeyhole } from 'lucide-react';
 import { usuariosApi } from '../../api';
 import { useAuthStore } from '../../stores/authStore';
 import type { UsuarioResumen, Rol } from '../../types';
@@ -145,7 +145,7 @@ function EditarModal({ usuario, onClose }: { usuario: UsuarioResumen; onClose: (
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" {...register('activo')} disabled={esMismoUsuario} className="sr-only peer" />
             <div className="w-10 h-6 bg-zinc-600 peer-checked:bg-brand rounded-full peer transition-colors peer-disabled:opacity-50" />
-            <div className="absolute left-1 top-1 w-4 h-4 bg-zinc-200 rounded-full shadow transition-transform peer-checked:translate-x-4" />
+            <div className="absolute left-1 top-1 w-4 h-4 bg-zinc-200 rounded-full transition-transform peer-checked:translate-x-4" />
           </label>
         </div>
         <div className="flex gap-3 pt-2">
@@ -174,7 +174,7 @@ export default function UsuariosPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-2xl mb-2">🔒</p>
+          <LockKeyhole className="w-6 h-6 mb-3 mx-auto text-zinc-400" aria-hidden="true" />
           <p className="text-lg font-medium text-zinc-200">Acceso restringido</p>
           <p className="text-sm text-zinc-400 mt-1">Solo administradores pueden gestionar usuarios</p>
         </div>
@@ -210,7 +210,7 @@ export default function UsuariosPage() {
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Usuario', 'Rol', 'Tipo', 'Estado', 'Último acceso', 'Acciones'].map((h) => (
-                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left text-xs font-medium text-zinc-400 px-4 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
