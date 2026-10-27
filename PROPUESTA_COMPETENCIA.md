@@ -13,6 +13,10 @@ Preventix ya cubre el CRUD esencial. Para **ganar una competencia**, la diferenc
 
 ## 🥇 Feature 1 — Motor de Análisis Predictivo de Fallas
 
+**Estado: puntuación heurística implementada (27 de octubre de 2026).** Inicio muestra los cinco equipos con mayor puntuación; el detalle explica cada factor y permite acceder al mantenimiento sugerido. No es una probabilidad ni una predicción validada a 30 días. El endpoint es `GET /api/dashboard/riesgo-equipos`. Se excluyen archivados.
+
+Reglas normalizadas: hasta 40 puntos por 5 fallas en 90 días; hasta 30 por 180 días sin preventivo completado (sin preventivo, desde adquisición o registro); hasta 20 por 5 años de antigüedad; hasta 10 por 2 fallas altas/críticas en 90 días. Cada aporte se limita a su máximo y se redondea antes de sumar. Bajo: 0–29; medio: 30–59; alto: 60–100. Si falta una fecha necesaria, se muestran factores disponibles y «Datos incompletos», sin puntuación total. La fórmula sin normalizar que sigue es la propuesta original, no el cálculo implementado.
+
 **Por qué gana:** el propio documento `PENDIENTES.md` lo identifica con **40% de interés del cliente** y nadie lo ha implementado. Es la funcionalidad más diferenciadora del proyecto.
 
 ### Qué hace
@@ -50,6 +54,12 @@ GET /api/analytics/riesgo-equipos
 ---
 
 ## 🥈 Feature 2 — Dashboard de Salud del Parque Tecnológico
+
+**Estado: versión mínima implementada (27 de octubre de 2026).** Inicio incluye «Estado general de los equipos» con desglose del índice y tendencias desplegables de seis meses. Endpoint: `GET /api/dashboard/salud-parque`.
+
+El cálculo implementado suma 40 puntos por proporción de equipos activos, 20 por equipos sin fallas pendientes y 40 por equipos con preventivo completado en los últimos 90 días y sin preventivos vencidos. Solo evalúa equipos sin archivar; varias fallas del mismo equipo cuentan una vez para el índice. Sin equipos, no se asigna puntuación. Sin historial preventivo, no se supone cobertura. Favorable desde 80; requiere atención desde 60; atención prioritaria por debajo de 60. Es un indicador operativo por reglas.
+
+Las tendencias muestran eventos de fallas reportadas/resueltas y costos de mantenimientos completados, según la zona horaria configurada, con meses vacíos en cero. Incluyen el historial de equipos archivados para conservar los totales de la organización. No representan un saldo histórico de fallas abiertas ni una serie histórica del índice. La fórmula que sigue es la propuesta original; se corrigieron sus denominadores y agrupaciones en la implementación.
 
 **Por qué gana:** convierte el dashboard actual (4 KPIs simples) en un centro de comando visual que impresiona en demo.
 
@@ -93,6 +103,8 @@ GET /api/analytics/salud-parque
 ---
 
 ## 🥉 Feature 3 — Plan de Mantenimiento Inteligente (Auto-scheduler)
+
+**Estado: versión mínima implementada (27 de octubre de 2026).** En Equipos → detalle → «Sugerir mantenimiento» se propone una frecuencia y fecha, se permite elegir responsable y ajustar la fecha, y «Aceptar y programar» guarda un preventivo en el backend. Usa el MTBF estimado existente; con menos de dos fallas o fechas insuficientes propone 30 días. Evita duplicar preventivos pendientes, incluso ante confirmaciones simultáneas. La frecuencia es orientativa: no genera tareas recurrentes ni predice fallas. El inventario muestra «Preventivo recomendado» cuando la revisión vence en siete días o menos y no existe un preventivo pendiente. Abre la confirmación para ajustar fecha y responsable; al programarlo desaparece el indicador.
 
 **Por qué gana:** automatiza la tarea más tediosa del técnico — decidir cuándo hacer mantenimiento preventivo.
 
@@ -162,6 +174,8 @@ GET /api/analytics/mtbf
 
 ## 🎖️ Feature 5 — Módulo de Presupuesto y Control de Costos
 
+**Estado: presupuesto mensual y anual implementado (27 de octubre de 2026).** El administrador define ambos límites independientes en Configuración → General; 0 significa sin límite. Inicio muestra consumo mensual y anual; Reportes → Presupuesto incluye comparativa por mes y exportación CSV. Cuenta costos de mantenimientos completados por fecha de finalización y zona horaria configurada. Conserva límites mensuales desde el primer registro; los cambios afectan el mes actual y siguientes, sin inventar límites anteriores. La proyección anual utiliza el promedio de meses cerrados × 12, como mínimo el gasto acumulado; en enero no hay proyección. Las alertas persistentes del 80% y exceso se generan al guardar mantenimientos/configuración o consultar notificaciones, sin cron ni correo, y no se duplican al consultar. Endpoint: `GET /api/dashboard/presupuesto`.
+
 **Por qué gana:** convierte Preventix de herramienta técnica a herramienta de negocio — habla el lenguaje de gerentes y directivos.
 
 ### Qué hace
@@ -200,6 +214,10 @@ Permite definir un **presupuesto mensual/anual** de mantenimiento y visualizar e
 ---
 
 ## 🎗️ Feature 6 — Gestión de Garantías y Contratos de Soporte
+
+**Estado: versión mínima implementada (27 de octubre de 2026).** Registrar/editar equipo permite guardar vencimiento de garantía, proveedor y vencimiento de contrato; vaciar fechas elimina la cobertura registrada. Inventario y detalle muestran vigencia y días restantes. Inventario y Reportes → Garantías y contratos filtran coberturas vencidas, próximas a vencer y equipos sin garantía vigente; el reporte exporta CSV.
+
+Los avisos persistentes se generan al consultar notificaciones o guardar equipos, dentro de las ventanas de 30 y 7 días y después del vencimiento; no hay envío de email ni cron. No se duplican al recargar. Al renovar, quitar fechas o archivar se marcan leídos los avisos obsoletos. El día de vencimiento aún cuenta como vigente; se usa la zona horaria de la empresa. Los equipos anteriores conservan «Sin registrar» hasta completar sus fechas.
 
 **Por qué gana:** ningún sistema básico de mantenimiento lo incluye, pero es un dolor real de las empresas.
 

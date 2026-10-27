@@ -21,6 +21,8 @@ const configSchema = z.object({
   diasAvisoMantenimiento: z.coerce.number().int().min(1).max(30),
   zonaHoraria: z.string(),
   moneda: z.string(),
+  presupuestoAnualMantenimiento: z.coerce.number().finite().min(0, 'No puede ser negativo').max(1000000000000, 'El límite es demasiado alto').multipleOf(0.01, 'Máximo dos decimales'),
+  presupuestoMensualMantenimiento: z.coerce.number().finite().min(0, 'No puede ser negativo').max(1000000000000, 'El límite es demasiado alto').multipleOf(0.01, 'Máximo dos decimales'),
 });
 const sedeSchema = z.object({
   nombre: z.string().min(2),
@@ -72,13 +74,13 @@ function TabEmpresa() {
 function TabConfig() {
   const toast = useToast();
   const qc = useQueryClient();
-  const { data: config } = useQuery({
+  const { data: config, isLoading, isError, refetch } = useQuery({
     queryKey: ['empresa-config'],
     queryFn: () => empresaApi.configuracion().then((r) => r.data.data ?? r.data),
   });
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<ConfigForm>({
+  const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<ConfigForm>({
     resolver: zodResolver(configSchema),
-    values: config ? { notifEmail: config.notifEmail, diasAvisoMantenimiento: config.diasAvisoMantenimiento, zonaHoraria: config.zonaHoraria, moneda: config.moneda } : undefined,
+    values: config ? { notifEmail: config.notifEmail, diasAvisoMantenimiento: config.diasAvisoMantenimiento, zonaHoraria: config.zonaHoraria, moneda: config.moneda, presupuestoMensualMantenimiento: config.presupuestoMensualMantenimiento ?? 0, presupuestoAnualMantenimiento: config.presupuestoAnualMantenimiento ?? 0 } : undefined,
   });
   const onSubmit = async (data: ConfigForm) => {
     try {
@@ -87,8 +89,22 @@ function TabConfig() {
       toast.success('Configuración guardada');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Error al guardar'); }
   };
+  if (isLoading) return <p role="status">Cargando preferencias…</p>;
+  if (isError) return <div role="alert">No se pudieron cargar las preferencias. <button className="btn-secondary" onClick={() => refetch()}>Reintentar</button></div>;
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-lg">
+      <div>
+        <label htmlFor="monthly-budget" className="label">Presupuesto mensual de mantenimiento</label>
+        <input id="monthly-budget" type="number" min="0" max="1000000000000" step="0.01" {...register('presupuestoMensualMantenimiento')} className="input" aria-invalid={!!errors.presupuestoMensualMantenimiento} aria-describedby="budget-help budget-error" />
+        <p id="budget-help" className="text-xs text-zinc-400 mt-2">En la moneda configurada. Se aplica cada mes; 0 significa sin presupuesto. Solo se descuentan mantenimientos completados durante el mes.</p>
+        <p id="budget-error" className="text-xs text-red-300 mt-2">{errors.presupuestoMensualMantenimiento?.message}</p>
+      </div>
+      <div>
+        <label htmlFor="annual-budget" className="label">Presupuesto anual de mantenimiento</label>
+        <input id="annual-budget" type="number" min="0" max="1000000000000" step="0.01" {...register('presupuestoAnualMantenimiento')} className="input" aria-invalid={!!errors.presupuestoAnualMantenimiento} aria-describedby="annual-budget-help annual-budget-error" />
+        <p id="annual-budget-help" className="text-xs text-zinc-400 mt-2">Límite independiente para el año calendario. 0 significa sin límite. Los cambios mensuales afectan el mes actual y los siguientes; los meses anteriores conservan su límite. Cambiar moneda no convierte los importes.</p>
+        <p id="annual-budget-error" className="text-xs text-red-300 mt-2">{errors.presupuestoAnualMantenimiento?.message}</p>
+      </div>
       <div className="flex items-center justify-between p-4 bg-ink rounded-xl">
         <div>
           <p className="text-sm font-medium text-zinc-200">Notificaciones por email</p>

@@ -21,7 +21,7 @@ export default function SlideOver({ open, onClose, title, children, width = 'lg'
   if (!open) return null;
 
   return (
-    <div data-modal-root className="fixed inset-0 z-50 flex">
+    <div data-modal-root className="slideover-root fixed inset-0 z-50 flex">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       {/* Panel */}

@@ -1,6 +1,12 @@
+import { recordBudget, budgetReport, syncBudgetNotifications } from './budgetPlanner';
+import { equipmentCoverage, matchesCoverage, syncCoverageNotifications } from './coverage';
+import { fleetHealth } from './fleetHealth';
+import { equipmentRisk } from './equipmentRisk';
+import { monthlyBudget } from './monthlyBudget';
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { filePersistence, type JsonPersistence } from './persistence';
+import { suggestMaintenance, calendarDay } from './maintenanceSuggestion';
 const crypto = { randomUUID };
 
 type Row = { id: string; [key: string]: unknown };
@@ -46,7 +52,7 @@ function seed(): Database {
 }
 
 function hydrate(db: Database, kind: string, row: Row): Row {
-  if (kind === 'equipos') return { ...row, sede: find(db.sedes, row.sedeId), responsable: find(db.usuarios, row.responsableId), usuarioAsignado: find(db.usuarios, row.usuarioAsignadoId) };
+  if (kind === 'equipos') return { ...row, sugerenciaMantenimiento: !row.archivado && !['archivado', 'fuera_servicio'].includes(String(row.estado)) ? suggestMaintenance({ fechaAdquisicion: row.fechaAdquisicion, createdAt: row.createdAt }, db.fallas.filter(f => f.equipoId === row.id).length, db.mantenimientos.filter(m => m.equipoId === row.id)) : null, cobertura: equipmentCoverage(row, String(db.configuracion.zonaHoraria || 'America/Bogota')), sede: find(db.sedes, row.sedeId), responsable: find(db.usuarios, row.responsableId), usuarioAsignado: find(db.usuarios, row.usuarioAsignadoId) };
   if (kind === 'fallas') return { ...row, equipo: find(db.equipos, row.equipoId), tecnico: find(db.usuarios, row.asignadoA), reportador: find(db.usuarios, row.reportadorId) };
   if (kind === 'mantenimientos') return { ...row, equipo: find(db.equipos, row.equipoId), responsable: find(db.usuarios, row.responsableId), falla: find(db.fallas, row.fallaId) };
   return row;
@@ -77,6 +83,8 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
     if (!actor || !actor.activo) throw new DemoError('Usuario no autorizado.', 401);
     const today = new Date(); today.setHours(0, 0, 0, 0);
     db.mantenimientos.forEach(m => { if (m.estado === 'programado' && new Date(text(m.fechaProgramada)) < today) m.estado = 'vencido'; });
+    if (kind === 'notificaciones') syncBudgetNotifications(db.mantenimientos, db.configuracion, db.notificaciones);
+    if (kind === 'notificaciones') syncCoverageNotifications(db.equipos, db.notificaciones, text(db.configuracion.zonaHoraria));
     let result: unknown;
     const session = (usuario: Row) => ({ usuario, empresa: db.empresa });
     const history = (equipoId: unknown, descripcion: string) => db.historial.unshift({ id: crypto.randomUUID(), equipoId, descripcion, tipoEvento: kind, usuario: { id: actor.id, nombre: actor.nombre }, createdAt: now() });
@@ -101,15 +109,21 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
       else fail('Acción no disponible.');
     } else if (kind === 'empresa') {
       const row = id === 'configuracion' ? db.configuracion : db.empresa;
-      if (method !== 'get') Object.assign(row, body);
+      if (method !== 'get') {
+        Object.assign(row, body);
+        if (id === 'configuracion') { recordBudget(db.configuracion); syncBudgetNotifications(db.mantenimientos, db.configuracion, db.notificaciones); }
+      }
       result = row;
     } else if (kind === 'dashboard') {
       const active = db.equipos.filter(e => !e.archivado);
       const pending = db.mantenimientos.filter(m => m.estado === 'programado');
-      const completed = db.mantenimientos.filter(m => m.estado === 'completado' && text(m.fechaFin).slice(0, 7) === now().slice(0, 7));
-      if (id === 'resumen') result = { totalEquipos: active.length, equiposActivos: active.filter(e => e.estado === 'activo').length, equiposEnMantenimiento: active.filter(e => e.estado === 'en_mantenimiento').length, fallasPendientes: db.fallas.filter(f => ['abierta', 'en_proceso'].includes(text(f.estado))).length, mantenimientosProximos: pending.length, mantenimientosVencidos: db.mantenimientos.filter(m => m.estado === 'vencido').length, mantenimientosCompletadosMes: completed.length, costoMes: completed.reduce((sum, m) => sum + Number(m.costo ?? 0), 0) };
+      const presupuestoMes = monthlyBudget(db.mantenimientos.map(m => ({ estado: m.estado, fechaFin: m.fechaFin, costo: m.costo })), Number(db.configuracion.presupuestoMensualMantenimiento ?? 0), text(db.configuracion.zonaHoraria));
+      if (id === 'resumen') result = { totalEquipos: active.length, equiposActivos: active.filter(e => e.estado === 'activo').length, equiposEnMantenimiento: active.filter(e => e.estado === 'en_mantenimiento').length, fallasPendientes: db.fallas.filter(f => ['abierta', 'en_proceso'].includes(text(f.estado))).length, mantenimientosProximos: pending.length, mantenimientosVencidos: db.mantenimientos.filter(m => m.estado === 'vencido').length, mantenimientosCompletadosMes: presupuestoMes.completados, costoMes: presupuestoMes.gasto, presupuestoMes: { ...presupuestoMes, moneda: db.configuracion.moneda || 'COP' } };
       else if (id === 'mantenimientos-proximos') result = pending.sort((a, b) => text(a.fechaProgramada).localeCompare(text(b.fechaProgramada))).map(m => hydrate(db, 'mantenimientos', m));
       else if (id === 'equipos-recurrentes') result = active.map(e => ({ equipoId: e.id, nombre: e.nombre, totalFallas: db.fallas.filter(f => f.equipoId === e.id).length })).filter(e => e.totalFallas > 0).sort((a, b) => b.totalFallas - a.totalFallas);
+      else if (id === 'presupuesto') { recordBudget(db.configuracion); result = budgetReport(db.mantenimientos, db.configuracion); }
+      else if (id === 'salud-parque') result = fleetHealth(db.equipos, db.fallas, db.mantenimientos, text(db.configuracion.zonaHoraria), text(db.configuracion.moneda) || 'COP');
+      else if (id === 'riesgo-equipos') result = active.map(e => equipmentRisk(e, db.fallas.filter(f => f.equipoId === e.id), db.mantenimientos.filter(m => m.equipoId === e.id))).sort((a, b) => (b.scoreRiesgo ?? -1) - (a.scoreRiesgo ?? -1));
       else if (id === 'mtbf') {
         const MS_PER_DAY = 86_400_000;
         result = active.map(e => {
@@ -125,7 +139,12 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
       const collections: Collection[] = ['equipos', 'fallas', 'mantenimientos', 'usuarios', 'sedes', 'notificaciones'];
       if (!collections.includes(kind as Collection)) fail('Ruta no disponible en la demo.');
       const rows = db[kind as Collection];
-      if (kind === 'equipos' && action === 'historial') result = db.historial.filter(h => h.equipoId === id);
+      if (kind === 'equipos' && action === 'sugerencia-mantenimiento') {
+        const equipment = required(db.equipos, id);
+        if (equipment.archivado || equipment.estado === 'fuera_servicio') fail('El equipo debe estar disponible para planificar un preventivo.');
+        result = suggestMaintenance({ fechaAdquisicion: equipment.fechaAdquisicion, createdAt: equipment.createdAt }, db.fallas.filter(f => f.equipoId === id).length, db.mantenimientos.filter(m => m.equipoId === id));
+      }
+      else if (kind === 'equipos' && action === 'historial') result = db.historial.filter(h => h.equipoId === id);
       else if (kind === 'notificaciones' && id === 'leer-todas') { rows.forEach(n => { n.leida = true; }); result = {}; }
       else if (kind === 'sedes' && action === 'ubicaciones') {
         const sede = required(rows, id);
@@ -138,12 +157,23 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
           if (kind === 'equipos' && row.archivado && params.estado !== 'archivado') return false;
           return Object.entries(params).every(([key, value]) => {
             if (!value || ['page', 'limit'].includes(key)) return true;
+            if (kind === 'equipos' && key === 'cobertura') return matchesCoverage(row, value, text(db.configuracion.zonaHoraria));
             if (key === 'search') return [row.nombre, row.numeroSerie, row.titulo, row.descripcion, find(db.equipos, row.equipoId)?.nombre].some(v => text(v).toLowerCase().includes(value.toLowerCase()));
             return text(row[key]) === value;
           });
         }).map(row => hydrate(db, kind, row));
       } else {
         const creating = method === 'post';
+        if (kind === 'mantenimientos' && creating && body.sugerido) {
+          const equipment = required(db.equipos, body.equipoId);
+          if (equipment.archivado || equipment.estado === 'fuera_servicio') fail('El equipo no está disponible para programar un preventivo.');
+          if (body.tipo !== 'preventivo') fail('La sugerencia debe ser un mantenimiento preventivo.');
+          if (!required(db.usuarios, body.responsableId).activo) fail('Selecciona un responsable activo.');
+          if (calendarDay(text(body.fechaProgramada)) < calendarDay(new Date())) fail('Selecciona una fecha de hoy en adelante.');
+          if (db.mantenimientos.some(m => m.equipoId === body.equipoId && m.tipo === 'preventivo' && ['programado', 'en_proceso', 'vencido'].includes(text(m.estado)))) {
+            throw new DemoError('Este equipo ya tiene un preventivo pendiente. Revisa la tarea existente.', 409);
+          }
+        }
         if (['fallas', 'mantenimientos'].includes(kind) && (creating || 'equipoId' in body)) {
           const equipo = required(db.equipos, body.equipoId);
           if (equipo.archivado) fail('Selecciona un equipo activo en el inventario.');
@@ -153,6 +183,10 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
         if (kind === 'usuarios' && creating && rows.some(u => text(u.email).toLowerCase() === text(body.email).toLowerCase())) fail('Este correo ya está registrado.');
         const row: Row = creating ? { id: crypto.randomUUID(), createdAt: now(), estado: kind === 'fallas' ? 'abierta' : kind === 'mantenimientos' ? 'programado' : 'activo', archivado: false, activo: true, esTecnicoExterno: false, reportadorId: actor.id, fechaReporte: now() } : required(rows, id);
         if (kind === 'usuarios' && !creating && row.id === actor.id && ((body.rol && body.rol !== actor.rol) || body.activo === false)) fail('No puedes desactivar tu usuario ni cambiar tu propio rol.');
+        if (kind === 'equipos') {
+          const merged = { ...row, ...body };
+          if (merged.contratoVencimiento && !text(merged.contratoSoporte).trim()) fail('Indica el proveedor del contrato de soporte.');
+        }
         const { password, ...safeBody } = body;
         Object.assign(row, safeBody, { updatedAt: now() });
         for (const field of ['fechaProgramada', 'fechaAdquisicion']) {
@@ -182,6 +216,8 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
             else if (equipo.estado === 'en_mantenimiento') equipo.estado = 'activo';
           }
         }
+        if (kind === 'mantenimientos') syncBudgetNotifications(db.mantenimientos, db.configuracion, db.notificaciones);
+        if (kind === 'equipos') syncCoverageNotifications(db.equipos, db.notificaciones, text(db.configuracion.zonaHoraria));
         result = hydrate(db, kind, row);
       }
     }

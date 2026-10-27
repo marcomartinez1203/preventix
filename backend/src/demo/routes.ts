@@ -8,11 +8,12 @@ import { StorageConflictError } from './persistence';
 
 const nonempty = z.string().trim().min(1);
 const date = z.string().refine(v => Number.isFinite(Date.parse(v)), 'Fecha inválida');
+const coverageDate = z.string().refine(v => v === '' || (/^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v), 'Fecha de vencimiento inválida');
 const roles = z.enum(['administrador', 'responsable', 'tecnico', 'consulta']);
 const schemas = {
-  equipos: z.object({ nombre: nonempty, tipo: z.enum(['desktop', 'laptop', 'servidor', 'otro']), estado: z.enum(['activo', 'en_mantenimiento', 'fuera_servicio', 'archivado']).default('activo'), marca: z.string().optional(), modelo: z.string().optional(), numeroSerie: z.string().optional(), procesador: z.string().optional(), ramGb: z.number().int().positive().optional(), almacenamientoGb: z.number().int().positive().optional(), sistemaOperativo: z.string().optional(), fechaAdquisicion: z.union([date, z.literal('')]).optional(), sedeId: z.string().optional(), responsableId: z.string().optional(), usuarioAsignadoId: z.string().optional(), notas: z.string().optional() }),
+  equipos: z.object({ nombre: nonempty, tipo: z.enum(['desktop', 'laptop', 'servidor', 'otro']), estado: z.enum(['activo', 'en_mantenimiento', 'fuera_servicio', 'archivado']).default('activo'), marca: z.string().optional(), modelo: z.string().optional(), numeroSerie: z.string().optional(), procesador: z.string().optional(), ramGb: z.number().int().positive().optional(), almacenamientoGb: z.number().int().positive().optional(), sistemaOperativo: z.string().optional(), fechaAdquisicion: z.union([date, z.literal('')]).optional(), garantiaVencimiento: coverageDate.optional(), contratoSoporte: z.string().trim().max(200).optional(), contratoVencimiento: coverageDate.optional(), sedeId: z.string().optional(), responsableId: z.string().optional(), usuarioAsignadoId: z.string().optional(), notas: z.string().optional() }),
   fallas: z.object({ equipoId: nonempty, titulo: nonempty, descripcion: nonempty, categoria: z.enum(['hardware', 'software', 'red', 'perifericos', 'otro']), prioridad: z.enum(['baja', 'media', 'alta', 'critica']), asignadoA: z.string().optional(), diagnostico: z.string().optional(), solucionAplicada: z.string().optional() }),
-  mantenimientos: z.object({ equipoId: nonempty, responsableId: nonempty, titulo: nonempty, tipo: z.enum(['preventivo', 'correctivo']), fechaProgramada: date, costo: z.number().min(0).optional(), fallaId: z.string().optional(), actividades: z.string().optional(), observaciones: z.string().optional() }),
+  mantenimientos: z.object({ equipoId: nonempty, responsableId: nonempty, titulo: nonempty, tipo: z.enum(['preventivo', 'correctivo']), fechaProgramada: date, sugerido: z.boolean().optional(), costo: z.number().min(0).optional(), fallaId: z.string().optional(), actividades: z.string().optional(), observaciones: z.string().optional() }),
   usuarios: z.object({ nombre: nonempty, email: z.string().email(), password: z.string().min(8), rol: roles }),
   sedes: z.object({ nombre: nonempty, ciudad: z.string().optional(), direccion: z.string().optional() }),
 };
@@ -81,11 +82,11 @@ export function createDemoRouter(source: string | JsonPersistence<Database>, sec
           res.json({ data: { ...result, accessToken: sign(session.userId, session.sid, 'access') } }); return;
         }
       } else if (kind === 'dashboard') {
-        valid = method === 'get' && !action && ['resumen', 'mantenimientos-proximos', 'equipos-recurrentes', 'mtbf'].includes(id);
+        valid = method === 'get' && !action && ['resumen', 'mantenimientos-proximos', 'equipos-recurrentes', 'mtbf', 'riesgo-equipos', 'salud-parque', 'presupuesto'].includes(id);
       } else if (kind === 'empresa' && !action && (!id || id === 'configuracion')) {
         valid = ['get', 'put'].includes(method);
         if (method === 'put') body = id === 'configuracion'
-          ? z.object({ notifEmail: z.boolean(), diasAvisoMantenimiento: z.number().int().min(1).max(30), zonaHoraria: nonempty, moneda: z.enum(['COP', 'USD', 'MXN', 'PEN', 'CLP', 'ARS']) }).parse(req.body)
+          ? z.object({ notifEmail: z.boolean(), diasAvisoMantenimiento: z.number().int().min(1).max(30), zonaHoraria: nonempty, moneda: z.enum(['COP', 'USD', 'MXN', 'PEN', 'CLP', 'ARS']), presupuestoMensualMantenimiento: z.number().finite().min(0).max(1000000000000).multipleOf(0.01).optional(), presupuestoAnualMantenimiento: z.number().finite().min(0).max(1000000000000).multipleOf(0.01).optional() }).parse(req.body)
           : z.object({ nombre: nonempty, nit: z.string().optional(), emailContacto: z.string().email(), telefono: z.string().optional() }).parse(req.body);
       } else if (kind === 'notificaciones') {
         valid = (method === 'get' && !id) || (method === 'patch' && ((id === 'leer-todas' && !action) || (!!id && action === 'leer')));
@@ -98,7 +99,7 @@ export function createDemoRouter(source: string | JsonPersistence<Database>, sec
         } else if (method === 'patch' && id && action === 'estado' && ['equipos', 'fallas', 'mantenimientos'].includes(kind)) {
           const states = kind === 'equipos' ? ['activo', 'en_mantenimiento', 'fuera_servicio', 'archivado'] : kind === 'fallas' ? ['abierta', 'en_proceso', 'resuelta', 'cerrada'] : ['programado', 'en_proceso', 'completado', 'cancelado', 'vencido'];
           body = z.object({ estado: z.string().refine(v => states.includes(v), 'Estado inválido') }).parse(req.body); valid = true;
-        } else if (kind === 'equipos' && id && ((action === 'historial' && method === 'get') || (action === 'archivar' && method === 'patch'))) valid = true;
+        } else if (kind === 'equipos' && id && ((['historial', 'sugerencia-mantenimiento'].includes(action) && method === 'get') || (action === 'archivar' && method === 'patch'))) valid = true;
         else if (kind === 'sedes' && id && action === 'ubicaciones' && ['get', 'post'].includes(method)) {
           if (method === 'post') body = z.object({ nombre: nonempty, descripcion: z.string().optional() }).parse(req.body);
           valid = true;

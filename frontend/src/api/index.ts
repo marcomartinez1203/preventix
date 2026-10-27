@@ -9,6 +9,7 @@ export const authApi = {
 };
 
 export const equiposApi = {
+  sugerencia: (id: string) => api.get(`/equipos/${id}/sugerencia-mantenimiento`),
   listar: (params?: Record<string, string>) => api.get('/equipos', { params }),
   obtener: (id: string) => api.get(`/equipos/${id}`),
   crear: (data: unknown) => api.post('/equipos', data),
@@ -35,6 +36,9 @@ export const mantenimientosApi = {
 };
 
 export const dashboardApi = {
+  presupuesto: () => api.get('/dashboard/presupuesto'),
+  salud: () => api.get('/dashboard/salud-parque'),
+  riesgos: () => api.get('/dashboard/riesgo-equipos'),
   resumen: () => api.get('/dashboard/resumen'),
   mantenimientosProximos: () => api.get('/dashboard/mantenimientos-proximos'),
   equiposRecurrentes: () => api.get('/dashboard/equipos-recurrentes'),

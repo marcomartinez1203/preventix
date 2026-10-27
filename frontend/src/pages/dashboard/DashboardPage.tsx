@@ -1,3 +1,8 @@
+import DeviceOverview from '../../components/common/DeviceOverview';
+import BudgetReport from '../../components/common/BudgetReport';
+import FleetHealth from '../../components/common/FleetHealth';
+import EquipmentRisk from '../../components/common/EquipmentRisk';
+import MonthlyBudget from '../../components/common/MonthlyBudget';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, ArrowRight, Plus, AlertCircle } from 'lucide-react';
@@ -42,7 +47,7 @@ export default function DashboardPage() {
 
     {/* At 1440: 240 sidebar + 56 gutters + 24 gap + 760 main + 360 rail = 1440. */}
     <div className="overview-grid">
-      <section className="card agenda-panel">
+      <div className="space-y-6 min-w-0"><DeviceOverview /><FleetHealth /><section className="card agenda-panel">
         <div className="panel-heading"><div><h2>Agenda de mantenimiento</h2><p>Próximas revisiones de tus equipos</p></div><Link to="/mantenimientos" className="text-link">Ver todas <ArrowUpRight size={15} /></Link></div>
         {overdue > 0 && <Link to="/mantenimientos?estado=vencido" className="attention-row"><AlertCircle size={17} aria-hidden="true" /><span>{number.format(overdue)} tareas fuera de plazo</span><ArrowRight size={17} aria-hidden="true" /></Link>}
         {upcoming.isError ? <LoadError retry={() => { void upcoming.refetch(); }}>No se pudo cargar la agenda.</LoadError> : upcoming.isLoading ? <div className="p-6 space-y-4" aria-label="Cargando agenda">{[0, 1, 2].map(i => <div key={i} className="h-14 bg-raised rounded-lg animate-pulse" />)}</div> : tasks.length ? <ul className="agenda-list">{tasks.map(task => {
@@ -50,15 +55,18 @@ export default function DashboardPage() {
           return <li key={task.id}><Link to={`/mantenimientos?estado=${task.estado}`} className="agenda-item"><time className="agenda-date" dateTime={task.fechaProgramada}><span>{format(date, 'dd')}</span><span>{format(date, 'MMM', { locale: es })}</span></time><div className="min-w-0"><h3>{task.titulo}</h3><p>{task.equipo.nombre}</p></div><span className={`agenda-state ${task.estado === 'vencido' ? 'text-brand' : ''}`}>{task.estado === 'vencido' ? 'Vencido' : task.estado === 'en_proceso' ? 'En proceso' : 'Programado'}</span><ArrowUpRight className="agenda-arrow" size={16} aria-hidden="true" /></Link></li>;
         })}</ul> : <div className="panel-message"><p>No hay revisiones próximas.</p><Link to="/mantenimientos" className="text-link mt-3">Organizar mantenimiento <ArrowRight size={16} /></Link></div>}
         {data && <div className="agenda-footer"><span>Equipos en mantenimiento</span><strong>{number.format(data.equiposEnMantenimiento)}</strong></div>}
-      </section>
+      </section></div>
 
-      <div className="overview-rail">
+      <div className="overview-rail"><EquipmentRisk />
         <section className="card ranking-panel">
           <div className="panel-heading"><div><h2>Equipos a seguir</h2><p>Mayor número de fallas registradas</p></div></div>
           {recurring.isError ? <LoadError retry={() => { void recurring.refetch(); }}>No se pudo cargar la recurrencia.</LoadError> : recurring.isLoading ? <div className="p-6" role="status">Cargando equipos…</div> : ranking.length ? <ol className="ranking-list">{ranking.map(e => <li key={e.equipoId}><Link to={`/equipos/${e.equipoId}`}><span className="ranking-label"><span>{e.nombre}</span><span className="tabular-nums">{number.format(e.totalFallas)} <span className="text-zinc-400">fallas</span></span></span><span className="ranking-track" aria-hidden="true"><span style={{ width: `${e.totalFallas / maxFailures * 100}%` }} /></span></Link></li>)}</ol> : <div className="panel-message">No hay fallas registradas.</div>}
         </section>
-        <section className="card monthly-panel"><div className="panel-heading"><div><h2>Inversión del mes</h2><p>{format(new Date(), 'MMMM yyyy', { locale: es })} · COP</p></div></div>{summary.isError ? <LoadError retry={() => { void summary.refetch(); }}>No se pudo cargar el costo.</LoadError> : <div className="monthly-total">{summary.isLoading ? '…' : data?.costoMes != null ? money.format(data.costoMes) : '—'}</div>}<Link to="/reportes" className="text-link">Consultar reportes <ArrowUpRight size={15} /></Link></section>
       </div>
     </div>
+    <div className="overview-finance">
+      <BudgetReport compact />
+        {data?.presupuestoMes ? <MonthlyBudget budget={data.presupuestoMes} /> : <section className="card monthly-panel"><div className="panel-heading"><div><h2>Inversión del mes</h2><p>{format(new Date(), 'MMMM yyyy', { locale: es })} · COP</p></div></div>{summary.isError ? <LoadError retry={() => { void summary.refetch(); }}>No se pudo cargar el costo.</LoadError> : <div className="monthly-total">{summary.isLoading ? '…' : data?.costoMes != null ? money.format(data.costoMes) : '—'}</div>}<Link to="/reportes" className="text-link">Consultar reportes <ArrowUpRight size={15} /></Link></section>}
+      </div>
   </div>;
 }

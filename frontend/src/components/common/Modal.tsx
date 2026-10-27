@@ -23,7 +23,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
 
   return (
     <div
-      data-modal-root className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      data-modal-root className="modal-root fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/70" />

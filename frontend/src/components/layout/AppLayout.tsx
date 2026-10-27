@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { useState, useEffect } from 'react';
@@ -7,6 +7,7 @@ import ToastContainer from '../common/ToastContainer';
 import { useToast } from '../../hooks/useToast';
 
 export default function AppLayout() {
+  const { pathname } = useLocation();
   const [menu, setMenu] = useState(false);
   const toast = useToast();
   const drawer = useDialog(menu, () => setMenu(false));
@@ -24,7 +25,7 @@ export default function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar onMenu={() => setMenu(true)} />
         <main id="main-content" tabIndex={-1} className="workspace-main flex-1 overflow-y-auto p-4 sm:p-7">
-          <div className="max-w-[1400px] mx-auto"><Outlet /></div>
+          <div key={pathname} className="route-surface max-w-[1400px] mx-auto"><Outlet /></div>
         </main>
       </div>
       <ToastContainer toasts={toast.toasts} />

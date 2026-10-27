@@ -1,14 +1,17 @@
+import DeviceStatus, { DeviceIcon } from '../../components/common/DeviceStatus';
 import RecordCard from '../../components/common/RecordCard';
+import CoverageBadges from '../../components/common/CoverageBadges';
+import MaintenanceSuggestion from '../../components/common/MaintenanceSuggestion';
 import { Link } from 'react-router-dom';
 import Pagination, { usePagination } from '../../components/common/Pagination';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Monitor, Laptop, Server, HelpCircle, Search, Edit2, Archive, Clock, Activity } from 'lucide-react';
+import { Plus, Search, Edit2, Archive, Clock, Activity } from 'lucide-react';
 import { equiposApi, sedesApi, usuariosApi, dashboardApi } from '../../api';
 import { useAuthStore } from '../../stores/authStore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
-import type { Equipo, EstadoEquipo, TipoEquipo, HistorialEquipoItem, MtbfEquipo } from '../../types';
+import type { Equipo, HistorialEquipoItem, MtbfEquipo } from '../../types';
 import Modal from '../../components/common/Modal';
 import SlideOver from '../../components/common/SlideOver';
 import EmptyState from '../../components/common/EmptyState';
@@ -19,20 +22,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 // ─── Helpers ────────────────────────────────────
-const tipoIcono: Record<TipoEquipo, React.ElementType> = {
-  desktop: Monitor, laptop: Laptop, servidor: Server, otro: HelpCircle,
-};
-const estadoColor: Record<EstadoEquipo, string> = {
-  activo: 'bg-emerald-400/10 text-emerald-400',
-  en_mantenimiento: 'bg-brand/15 text-brand',
-  fuera_servicio: 'bg-red-400/10 text-red-400',
-  archivado: 'bg-raised text-zinc-400',
-};
-const estadoLabel: Record<EstadoEquipo, string> = {
-  activo: 'Activo', en_mantenimiento: 'En mantenimiento',
-  fuera_servicio: 'Fuera de servicio', archivado: 'Archivado',
-};
-
 // ─── MTBF Badge ──────────────────────────────────
 const mtbfConfig = {
   excelente: { label: 'Excelente', cls: 'bg-emerald-400/10 text-emerald-400' },
@@ -67,12 +56,15 @@ const schema = z.object({
   almacenamientoGb: z.coerce.number().int().positive().optional().or(z.literal('')),
   sistemaOperativo: z.string().optional(),
   fechaAdquisicion: z.string().optional(),
+  garantiaVencimiento: z.string().optional(),
+  contratoSoporte: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
+  contratoVencimiento: z.string().optional(),
   sedeId: z.string().optional(),
   usuarioAsignadoId: z.string().optional(),
   responsableId: z.string().optional(),
   estado: z.enum(['activo', 'en_mantenimiento', 'fuera_servicio', 'archivado']),
   notas: z.string().optional(),
-});
+}).refine(data => !data.contratoVencimiento || !!data.contratoSoporte, { path: ['contratoSoporte'], message: 'Indica el proveedor del contrato' });
 type FormData = z.infer<typeof schema>;
 
 // ─── Historial Modal ─────────────────────────────
@@ -132,6 +124,9 @@ function EquipoForm({
       almacenamientoGb: equipo.almacenamientoGb ?? '',
       sistemaOperativo: equipo.sistemaOperativo ?? '',
       fechaAdquisicion: equipo.fechaAdquisicion?.slice(0, 10) ?? '',
+      garantiaVencimiento: equipo.garantiaVencimiento ?? '',
+      contratoSoporte: equipo.contratoSoporte ?? '',
+      contratoVencimiento: equipo.contratoVencimiento ?? '',
       sedeId: equipo.sede?.id ?? '', usuarioAsignadoId: equipo.usuarioAsignado?.id ?? '',
       responsableId: equipo.responsable?.id ?? '', estado: equipo.estado,
       notas: equipo.notas ?? '',
@@ -193,6 +188,11 @@ function EquipoForm({
         {field('RAM (GB)', 'ramGb', 'number')}
         {field('Almacenamiento (GB)', 'almacenamientoGb', 'number')}
         {field('Fecha adquisición', 'fechaAdquisicion', 'date')}
+        <div className="col-span-2 border-t border-line pt-4"><h3 className="font-medium text-sm mb-3">Garantía y soporte</h3><div className="grid grid-cols-2 gap-3">
+          {field('Vencimiento de garantía', 'garantiaVencimiento', 'date')}
+          {field('Proveedor de soporte', 'contratoSoporte')}
+          {field('Vencimiento del contrato', 'contratoVencimiento', 'date')}
+        </div><p className="text-xs text-zinc-400 mt-3">Fechas opcionales. Vacía el campo para quitar una fecha. Los avisos aparecen al consultar el programa, a 30 y 7 días del vencimiento.</p></div>
         <div>
           <label htmlFor="EquipoForm-register-sedeId" className="label">Sede</label>
           <select id="EquipoForm-register-sedeId" {...register('sedeId')} className="input">
@@ -238,6 +238,8 @@ export default function EquiposPage() {
   const [search, setSearch] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState('');
+  const [coberturaFiltro, setCoberturaFiltro] = useState('');
+  const [suggested, setSuggested] = useState<Equipo | null>(null);
   const [slideover, setSlideover] = useState<'create' | 'edit' | null>(null);
   const [selected, setSelected] = useState<Equipo | null>(null);
   const [historialEquipo, setHistorialEquipo] = useState<Equipo | null>(null);
@@ -246,6 +248,7 @@ export default function EquiposPage() {
   if (search) params.search = search;
   if (tipoFiltro) params.tipo = tipoFiltro;
   if (estadoFiltro) params.estado = estadoFiltro;
+  if (coberturaFiltro) params.cobertura = coberturaFiltro;
 
   const { data: equipos = [], isLoading, isError, refetch } = useQuery<Equipo[]>({
     queryKey: ['equipos', params],
@@ -275,7 +278,7 @@ export default function EquiposPage() {
 
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5">{suggested && <MaintenanceSuggestion equipo={suggested} onClose={() => setSuggested(null)} />}
       {historialEquipo && <HistorialModal equipo={historialEquipo} onClose={() => setHistorialEquipo(null)} />}
       <SlideOver
         open={slideover !== null}
@@ -324,41 +327,46 @@ export default function EquiposPage() {
         </select>
       </div>
 
+      <label className="label max-w-sm">Garantía y soporte
+        <select className="input mt-1" value={coberturaFiltro} onChange={e => setCoberturaFiltro(e.target.value)}>
+          <option value="">Todas las coberturas</option><option value="sin_garantia">Sin garantía vigente</option><option value="por_vencer">Por vencer en 30 días</option><option value="contratos_por_vencer">Contratos por vencer</option><option value="vencidos">Coberturas vencidas</option>
+        </select>
+      </label>
       {/* Tabla */}
       <div className="card overflow-hidden">
         {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : equipos.length === 0 ? (
-          Object.keys(params).length ? <EmptyState title="Sin coincidencias" description="Prueba otra búsqueda o quita los filtros para ver todos los registros." action={<button onClick={() => { setSearch(''); setTipoFiltro(''); setEstadoFiltro(''); }} className="btn-secondary">Limpiar filtros</button>} /> : <EmptyState title="Sin equipos registrados" description="Registra el primer equipo para comenzar." action={puedeEditar ? <button onClick={() => setSlideover('create')} className="btn-primary">Registrar equipo</button> : undefined} />
+          Object.keys(params).length ? <EmptyState title="Sin coincidencias" description="Prueba otra búsqueda o quita los filtros para ver todos los registros." action={<button onClick={() => { setSearch(''); setTipoFiltro(''); setEstadoFiltro(''); setCoberturaFiltro(''); }} className="btn-secondary">Limpiar filtros</button>} /> : <EmptyState title="Sin equipos registrados" description="Registra el primer equipo para comenzar." action={puedeEditar ? <button onClick={() => setSlideover('create')} className="btn-primary">Registrar equipo</button> : undefined} />
         ) : (
           <><div className="sm:hidden">{pagination.visible.map(eq => <RecordCard key={eq.id}
-            title={<Link to={`/equipos/${eq.id}`} className="hover:underline">{eq.nombre}</Link>}
+            title={<Link to={`/equipos/${eq.id}`} className="flex items-center gap-3 hover:underline"><DeviceIcon equipo={eq} />{eq.nombre}</Link>}
             subtitle={[eq.marca, eq.modelo].filter(Boolean).join(' ')}
-            badges={<span className={`badge ${estadoColor[eq.estado]}`}>{estadoLabel[eq.estado]}</span>}
+            badges={<><DeviceStatus equipo={eq} /><CoverageBadges equipo={eq} />{eq.sugerenciaMantenimiento?.recomendado && <button className="record-action text-brand" onClick={() => setSuggested(eq)} disabled={usuario?.rol === 'consulta'}>Preventivo recomendado</button>}</>}
             fields={[{ label: 'Sede', value: eq.sede?.nombre }, { label: 'Responsable', value: eq.responsable?.nombre }, { label: 'Serie', value: eq.numeroSerie }, { label: 'Tipo', value: eq.tipo }]}
             actions={actions(eq, true)} />)}</div>
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm"><caption className="sr-only">Inventario de equipos</caption>
               <thead>
                 <tr className="border-b border-line bg-ink">
-                  {['Equipo', 'Marca / Modelo', 'Sede', 'Responsable', 'Estado', 'Entre fallas', 'Adquisición', 'Acciones'].map((h) => (
+                  {['Equipo', 'Marca / Modelo', 'Sede', 'Responsable', 'Estado', 'Entre fallas', 'Adquisición', 'Garantía / soporte', 'Acciones'].map((h) => (
                     <th scope="col" key={h} className="text-left text-xs font-medium text-zinc-400 px-4 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800">
                 {pagination.visible.map((eq) => {
-                  const TipoIcon = tipoIcono[eq.tipo] ?? HelpCircle;
+
                   return (
                     <tr key={eq.id} className="hover:bg-ink transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="text-zinc-400 shrink-0">
-                            <TipoIcon className="w-4 h-4" />
+                            <DeviceIcon equipo={eq} />
                           </div>
                           <div>
                             <Link to={`/equipos/${eq.id}`} className="font-medium text-zinc-100 hover:underline">{eq.nombre}</Link>
-                            {eq.numeroSerie && <p className="text-xs text-zinc-400">S/N: {eq.numeroSerie}</p>}
+                            {eq.numeroSerie && <p className="text-xs text-zinc-400">S/N: {eq.numeroSerie}</p>}{eq.sugerenciaMantenimiento?.recomendado && <button className="min-h-11 text-xs text-brand text-left" onClick={() => setSuggested(eq)} disabled={usuario?.rol === 'consulta'}>Preventivo recomendado →</button>}
                           </div>
                         </div>
                       </td>
@@ -373,7 +381,7 @@ export default function EquiposPage() {
                         {eq.responsable?.nombre ?? <span className="text-zinc-400">—</span>}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`badge ${estadoColor[eq.estado]}`}>{estadoLabel[eq.estado]}</span>
+                        <DeviceStatus equipo={eq} />
                       </td>
                       <td className="px-4 py-3">
                         <MtbfBadge data={mtbfMap[eq.id]} />
@@ -381,6 +389,7 @@ export default function EquiposPage() {
                       <td className="px-4 py-3 text-zinc-400 text-xs">
                         {eq.fechaAdquisicion ? format(new Date(eq.fechaAdquisicion), 'dd MMM yyyy', { locale: es }) : '—'}
                       </td>
+                      <td className="px-4 py-3"><CoverageBadges equipo={eq} /></td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">{actions(eq)}</div>
                       </td>

@@ -38,6 +38,11 @@ export interface UbicacionResumen {
 }
 
 export interface Equipo {
+  sugerenciaMantenimiento?: { recomendado: boolean; frecuenciaDias: number; fechaProgramada: string; diasHastaRevision: number; pendiente: { id: string } | null } | null;
+  garantiaVencimiento?: string;
+  contratoSoporte?: string;
+  contratoVencimiento?: string;
+  cobertura?: { garantia: Cobertura; contrato: Cobertura };
   id: string;
   nombre: string;
   tipo: TipoEquipo;
@@ -59,6 +64,12 @@ export interface Equipo {
   ubicacion?: UbicacionResumen;
   usuarioAsignado?: UsuarioResumen;
   responsable?: UsuarioResumen;
+}
+
+export interface Cobertura {
+  fecha: string | null;
+  diasRestantes: number | null;
+  estado: 'sin_registrar' | 'vigente' | 'por_vencer' | 'vencida';
 }
 
 export interface HistorialEquipoItem {
@@ -113,6 +124,11 @@ export interface DashboardResumen {
   mantenimientosVencidos: number;
   mantenimientosCompletadosMes: number;
   costoMes?: number;
+  presupuestoMes?: {
+    periodo: string; moneda: string; limite: number; gasto: number;
+    saldo: number | null; porcentaje: number | null;
+    estado: 'sin_configurar' | 'normal' | 'alerta' | 'excedido';
+  };
 }
 
 export interface Notificacion {
@@ -141,4 +157,26 @@ export interface MtbfEquipo {
   mtbfDias: number;
   totalFallas: number;
   clasificacion: 'excelente' | 'bueno' | 'regular' | 'critico';
+}
+export interface RiesgoEquipo { equipoId: string; nombre: string; scoreRiesgo: number | null; nivelRiesgo: "alto" | "medio" | "bajo" | "sin_datos"; factores: { nombre: string; detalle: string; puntos: number | null; maximo: number }[]; calculadoEn: string; }
+export interface SaludEquipos {
+  indice: number | null;
+  estado: 'sin_equipos' | 'favorable' | 'atencion' | 'prioritario';
+  totalEquipos: number;
+  equiposConFallas: number;
+  equiposSinPreventivoReciente: number;
+  factores: { nombre: string; cantidad: number; total: number; peso: number; puntos: number | null }[];
+  tendencias: { mes: string; reportadas: number; resueltas: number; costo: number }[];
+  moneda: string;
+  calculadoEn: string;
+}
+export interface PeriodoPresupuesto {
+  periodo: string; gasto: number; limite: number; saldo: number | null; porcentaje: number | null;
+  estado: 'sin_configurar' | 'normal' | 'alerta' | 'excedido';
+}
+export interface ReportePresupuesto {
+  moneda: string;
+  mes: PeriodoPresupuesto;
+  meses: (PeriodoPresupuesto & { historialDisponible: boolean })[];
+  anual: PeriodoPresupuesto & { proyeccion: number | null; mesesCerrados: number };
 }
