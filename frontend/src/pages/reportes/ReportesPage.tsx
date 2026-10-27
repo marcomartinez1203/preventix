@@ -1,3 +1,5 @@
+import ExcelExportButton from '../../components/common/ExcelExportButton';
+import { countChart, type ExcelReport } from '../../utils/excelReport';
 import ReportCharts from '../../components/common/ReportCharts';
 import BudgetReport from '../../components/common/BudgetReport';
 import { useSearchParams } from 'react-router-dom';
@@ -26,15 +28,23 @@ export default function ReportesPage() {
   fallas.forEach(f => { const key = `${f.equipo.id}-${f.categoria}`; const g = groups.get(key) ?? { nombre: f.equipo.nombre, categoria: f.categoria, total: 0, pendientes: 0 }; g.total++; if (['abierta', 'en_proceso'].includes(f.estado)) g.pendientes++; groups.set(key, g); });
   const rows: (string | number)[][] = !valid ? [] : tipo === 'equipos' ? (query.data?.equipos ?? []).map(e => [e.nombre, e.tipo, e.estado.replaceAll('_', ' '), fallas.filter(f => f.equipo.id === e.id).length, mant.filter(m => m.equipo.id === e.id).length]) : tipo === 'mantenimientos' ? mant.map(m => [m.titulo, m.equipo.nombre, new Date(m.fechaProgramada).toLocaleDateString('es-CO'), m.estado.replaceAll('_', ' '), Number(m.costo ?? 0)]) : [...groups.values()].map(g => [g.nombre, g.categoria, g.total, g.pendientes]);
   const pagination = usePagination(rows, `${tipo}-${desde}-${hasta}`);
-  const exportCsv = () => {
-    const cell = (v: string | number) => `"${String(v).replace(/^[=+@\-\t\r]/, "'$&").replaceAll('"', '""')}"`;
-    const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(cell).join(';')).join('\r\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const a = document.createElement('a'); a.href = url; a.download = `preventix-${tipo}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const excelReport = (): ExcelReport => {
+    const charts = tipo === 'equipos'
+      ? [countChart('Equipos por estado', (query.data?.equipos ?? []).map(e => e.estado.replaceAll('_', ' '))), countChart('Tipos de dispositivo', (query.data?.equipos ?? []).map(e => e.tipo))]
+      : tipo === 'mantenimientos'
+      ? [countChart('Mantenimientos por estado', mant.map(m => m.estado.replaceAll('_', ' '))), countChart('Tipos de mantenimiento', mant.map(m => m.tipo))]
+      : [countChart('Fallas por categoría', fallas.map(f => f.categoria)), countChart('Fallas por estado', fallas.map(f => f.estado.replaceAll('_', ' ')))];
+    if (tipo === 'mantenimientos') charts.push({ title: 'Costo por tipo (sin cancelados)', categories: ['Preventivo', 'Correctivo'], series: [{ name: 'Costo registrado', values: ['preventivo', 'correctivo'].map(type => Math.round(mant.filter(m => m.tipo === type && m.estado !== 'cancelado').reduce((sum, m) => sum + Math.round(Number(m.costo ?? 0) * 100), 0)) / 100) }], money: true });
+    if (tipo === 'fallas') {
+      const chart = countChart('Equipos con más fallas · diez primeros', fallas.map(f => `${f.equipo.nombre} (${f.equipo.id})`));
+      const top = chart.categories.map((label, i) => ({ label, value: chart.series[0].values[i] ?? 0 })).sort((a, b) => b.value - a.value).slice(0, 10);
+      charts.push({ ...chart, categories: top.map(r => r.label), series: [{ name: 'Fallas', values: top.map(r => r.value) }] });
+    }
+    return { title: `Reporte de ${tipo}`, subtitle: `${desde || 'Inicio'} — ${hasta || 'Actualidad'} · ${tipo === 'equipos' ? 'Inventario actual; fechas aplicadas a fallas y mantenimientos' : tipo === 'mantenimientos' ? 'Por fecha programada; costos incluyen estimaciones' : 'Por fecha de reporte'}`, headers, rows, charts, moneyColumns: tipo === 'mantenimientos' ? [4] : [], highlights: [['Registros exportados', rows.length], ...(tipo === 'mantenimientos' ? [['Costo sin cancelados', mant.filter(m => m.estado !== 'cancelado').reduce((sum, m) => sum + Number(m.costo ?? 0), 0)]] as [string, number][] : [])] };
   };
   if (tipo === 'presupuesto') return <div className="space-y-6"><header className="flex flex-wrap justify-between gap-3"><h1 className="text-2xl font-bold">Control de presupuesto</h1><button className="btn-secondary" onClick={() => setTipo('equipos')}>Volver a reportes</button></header><BudgetReport /></div>;
   if (tipo === 'coberturas') return <div className="space-y-6"><header className="flex flex-wrap justify-between gap-3"><div><h1 className="text-2xl font-bold">Garantías y contratos</h1><p className="text-sm text-zinc-400 mt-1">Vencimientos y proveedores de soporte.</p></div><button className="btn-secondary" onClick={() => setTipo('equipos')}>Volver a reportes</button></header><CoverageReport /></div>;
-  return <div className="space-y-6"><div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">Reportes</h1><p className="text-zinc-400 text-sm">Consulta tu inventario, costos y fallas recurrentes.</p></div><button className="btn-primary" disabled={!rows.length || query.isLoading} onClick={exportCsv}>Exportar CSV para Excel</button></div>
+  return <div className="space-y-6"><div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">Reportes</h1><p className="text-zinc-400 text-sm">Consulta tu inventario, costos y fallas recurrentes.</p></div><ExcelExportButton report={excelReport} filename={`preventix-${tipo}`} disabled={!rows.length || query.isLoading || query.isError} /></div>
     <div className="card p-4 flex flex-wrap gap-4"><label className="label">Reporte<select className="input mt-1" value={tipo} onChange={e => setTipo(e.target.value)}><option value="equipos">Equipos</option><option value="presupuesto">Presupuesto mensual y anual</option><option value="coberturas">Garantías y contratos</option><option value="mantenimientos">Mantenimientos</option><option value="fallas">Fallas por equipo y categoría</option></select></label><label className="label">Desde<input className="input mt-1" type="date" value={desde} onChange={e => setDesde(e.target.value)} /></label><label className="label">Hasta<input className="input mt-1" type="date" value={hasta} onChange={e => setHasta(e.target.value)} /></label><button className="text-sm text-brand" onClick={() => { setDesde(''); setHasta(''); }}>Limpiar fechas</button></div>
     {!valid && <p role="alert" className="text-red-400">La fecha inicial no puede ser posterior a la final.</p>}
     <p className="text-sm text-zinc-400">El rango filtra la fecha de reporte de fallas y la fecha programada de mantenimientos. El inventario incluye todos los equipos sin archivar.</p>

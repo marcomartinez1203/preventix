@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { unzipSync, strFromU8 } from 'fflate';
+import { buildExcelReport, countChart } from '../src/utils/excelReport.ts';
+
+const report = { title: 'Presupuesto & equipos', subtitle: 'Filtro: octubre', headers: ['Equipo', 'Gasto', 'Límite'], rows: [['=SUM(1,2)', 12.5, null], ['Portátil <A>', 0, 20]], moneyColumns: [1, 2], charts: [countChart('Estados', ['Activo', 'Activo', 'Revisión']), { title: 'Costos', categories: ['Octubre', 'Noviembre'], series: [{ name: 'Gasto', values: [12.5, 0] }, { name: 'Límite', values: [null, 20] }], money: true }] };
+const bytes = buildExcelReport(report);
+const files = unzipSync(bytes);
+const read = name => strFromU8(files[name]);
+assert.match(read('xl/worksheets/sheet2.xml'), /t="inlineStr"><is><t xml:space="preserve">=SUM\(1,2\)/);
+assert.match(read('xl/worksheets/sheet2.xml'), /<v>12.5<\/v>/);
+assert.match(read('xl/worksheets/sheet2.xml'), /autoFilter ref="A4:C6"/);
+assert.match(read('xl/charts/chart1.xml'), /<c:v>2<\/c:v>/);
+assert.match(read('xl/charts/chart2.xml'), /<c:numRef>/);
+assert.equal((read('xl/charts/chart2.xml').match(/<c:ser>/g) ?? []).length, 2);
+assert.match(read('xl/drawings/_rels/drawing1.xml.rels'), /chart2.xml/);
+assert.match(read('xl/worksheets/sheet1.xml'), /Presupuesto &amp; equipos/);
+const empty = unzipSync(buildExcelReport({ ...report, rows: [], charts: [countChart('Vacío', [])] }));
+assert.equal(empty['xl/drawings/drawing1.xml'], undefined);
+const directory = mkdtempSync(join(tmpdir(), 'preventix-excel-'));
+writeFileSync(join(directory, 'report.xlsx'), bytes);
+console.log(`Validado: números, textos seguros, filtros, dos gráficas nativas, datos vacíos. Archivo: ${join(directory, 'report.xlsx')}`);
