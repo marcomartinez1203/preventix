@@ -81,7 +81,7 @@ export function createDemoRouter(source: string | JsonPersistence<Database>, sec
           res.json({ data: { ...result, accessToken: sign(session.userId, session.sid, 'access') } }); return;
         }
       } else if (kind === 'dashboard') {
-        valid = method === 'get' && !action && ['resumen', 'mantenimientos-proximos', 'equipos-recurrentes'].includes(id);
+        valid = method === 'get' && !action && ['resumen', 'mantenimientos-proximos', 'equipos-recurrentes', 'mtbf'].includes(id);
       } else if (kind === 'empresa' && !action && (!id || id === 'configuracion')) {
         valid = ['get', 'put'].includes(method);
         if (method === 'put') body = id === 'configuracion'

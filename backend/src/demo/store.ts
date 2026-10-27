@@ -109,7 +109,18 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
       const completed = db.mantenimientos.filter(m => m.estado === 'completado' && text(m.fechaFin).slice(0, 7) === now().slice(0, 7));
       if (id === 'resumen') result = { totalEquipos: active.length, equiposActivos: active.filter(e => e.estado === 'activo').length, equiposEnMantenimiento: active.filter(e => e.estado === 'en_mantenimiento').length, fallasPendientes: db.fallas.filter(f => ['abierta', 'en_proceso'].includes(text(f.estado))).length, mantenimientosProximos: pending.length, mantenimientosVencidos: db.mantenimientos.filter(m => m.estado === 'vencido').length, mantenimientosCompletadosMes: completed.length, costoMes: completed.reduce((sum, m) => sum + Number(m.costo ?? 0), 0) };
       else if (id === 'mantenimientos-proximos') result = pending.sort((a, b) => text(a.fechaProgramada).localeCompare(text(b.fechaProgramada))).map(m => hydrate(db, 'mantenimientos', m));
-      else result = active.map(e => ({ equipoId: e.id, nombre: e.nombre, totalFallas: db.fallas.filter(f => f.equipoId === e.id).length })).filter(e => e.totalFallas > 0).sort((a, b) => b.totalFallas - a.totalFallas);
+      else if (id === 'equipos-recurrentes') result = active.map(e => ({ equipoId: e.id, nombre: e.nombre, totalFallas: db.fallas.filter(f => f.equipoId === e.id).length })).filter(e => e.totalFallas > 0).sort((a, b) => b.totalFallas - a.totalFallas);
+      else if (id === 'mtbf') {
+        const MS_PER_DAY = 86_400_000;
+        result = active.map(e => {
+          const fallas = db.fallas.filter(f => f.equipoId === e.id);
+          const inicio = e.fechaAdquisicion ? new Date(text(e.fechaAdquisicion)) : new Date(text(e.createdAt));
+          const periodoDias = Math.max(1, (Date.now() - inicio.getTime()) / MS_PER_DAY);
+          const mtbfDias = fallas.length === 0 ? Math.round(periodoDias) : Math.round(periodoDias / fallas.length);
+          const clasificacion = mtbfDias > 90 ? 'excelente' : mtbfDias > 30 ? 'bueno' : mtbfDias > 15 ? 'regular' : 'critico';
+          return { equipoId: e.id, nombre: e.nombre, tipo: e.tipo, mtbfDias, totalFallas: fallas.length, clasificacion };
+        }).sort((a, b) => b.mtbfDias - a.mtbfDias);
+      }
     } else {
       const collections: Collection[] = ['equipos', 'fallas', 'mantenimientos', 'usuarios', 'sedes', 'notificaciones'];
       if (!collections.includes(kind as Collection)) fail('Ruta no disponible en la demo.');

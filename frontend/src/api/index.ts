@@ -38,6 +38,7 @@ export const dashboardApi = {
   resumen: () => api.get('/dashboard/resumen'),
   mantenimientosProximos: () => api.get('/dashboard/mantenimientos-proximos'),
   equiposRecurrentes: () => api.get('/dashboard/equipos-recurrentes'),
+  mtbf: () => api.get('/dashboard/mtbf'),
 };
 
 export const notificacionesApi = {

@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import Pagination, { usePagination } from '../../components/common/Pagination';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Monitor, Laptop, Server, HelpCircle, Search, Edit2, Archive, Clock } from 'lucide-react';
-import { equiposApi, sedesApi, usuariosApi } from '../../api';
+import { Plus, Monitor, Laptop, Server, HelpCircle, Search, Edit2, Archive, Clock, Activity } from 'lucide-react';
+import { equiposApi, sedesApi, usuariosApi, dashboardApi } from '../../api';
 import { useAuthStore } from '../../stores/authStore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
-import type { Equipo, EstadoEquipo, TipoEquipo, HistorialEquipoItem } from '../../types';
+import type { Equipo, EstadoEquipo, TipoEquipo, HistorialEquipoItem, MtbfEquipo } from '../../types';
 import Modal from '../../components/common/Modal';
 import SlideOver from '../../components/common/SlideOver';
 import EmptyState from '../../components/common/EmptyState';
@@ -38,6 +38,28 @@ const estadoLabel: Record<EstadoEquipo, string> = {
   activo: 'Activo', en_mantenimiento: 'En mantenimiento',
   fuera_servicio: 'Fuera de servicio', archivado: 'Archivado',
 };
+
+// ─── MTBF Badge ──────────────────────────────────
+const mtbfConfig = {
+  excelente: { label: 'Excelente', cls: 'bg-emerald-400/10 text-emerald-400' },
+  bueno:     { label: 'Bueno',     cls: 'bg-brand/15 text-brand' },
+  regular:   { label: 'Regular',   cls: 'bg-yellow-400/10 text-yellow-400' },
+  critico:   { label: 'Crítico',   cls: 'bg-red-400/10 text-red-400' },
+} as const;
+
+function MtbfBadge({ data }: { data?: MtbfEquipo }) {
+  if (!data) return <span className="text-zinc-500 text-xs">—</span>;
+  const { label, cls } = mtbfConfig[data.clasificacion];
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className={`badge ${cls} flex items-center gap-1 w-fit`}>
+        <Activity className="w-3 h-3" aria-hidden="true" />
+        {data.mtbfDias}d
+      </span>
+      <span className="text-[11px] text-zinc-500">{label}</span>
+    </div>
+  );
+}
 
 // ─── Schema ──────────────────────────────────────
 const schema = z.object({
@@ -235,6 +257,13 @@ export default function EquiposPage() {
     queryKey: ['equipos', params],
     queryFn: () => equiposApi.listar(params).then((r) => r.data.data ?? r.data),
   });
+
+  const { data: mtbfData = [] } = useQuery<MtbfEquipo[]>({
+    queryKey: ['mtbf'],
+    queryFn: () => dashboardApi.mtbf().then((r) => r.data.data ?? r.data),
+  });
+  const mtbfMap = Object.fromEntries(mtbfData.map((m) => [m.equipoId, m]));
+
   const pagination = usePagination(equipos, JSON.stringify(params));
 
   const archivar = useMutation({
@@ -351,6 +380,9 @@ export default function EquiposPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className={`badge ${estadoColor[eq.estado]}`}>{estadoLabel[eq.estado]}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <MtbfBadge data={mtbfMap[eq.id]} />
                       </td>
                       <td className="px-4 py-3 text-zinc-400 text-xs">
                         {eq.fechaAdquisicion ? format(new Date(eq.fechaAdquisicion), 'dd MMM yyyy', { locale: es }) : '—'}

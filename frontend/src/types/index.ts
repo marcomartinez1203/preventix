@@ -133,3 +133,12 @@ export interface PaginatedResponse<T> {
   limit: number;
   totalPages: number;
 }
+
+export interface MtbfEquipo {
+  equipoId: string;
+  nombre: string;
+  tipo: TipoEquipo;
+  mtbfDias: number;
+  totalFallas: number;
+  clasificacion: 'excelente' | 'bueno' | 'regular' | 'critico';
+}
