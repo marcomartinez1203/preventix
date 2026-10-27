@@ -59,10 +59,10 @@ function TabEmpresa() {
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
-      <div><label className="label">Nombre de la empresa *</label><input {...register('nombre')} className="input" />{errors.nombre && <p className="text-xs text-red-400 mt-1">{errors.nombre.message}</p>}</div>
-      <div><label className="label">NIT / RUC</label><input {...register('nit')} className="input" placeholder="Ej: 900.123.456-7" /></div>
-      <div><label className="label">Email de contacto *</label><input type="email" {...register('emailContacto')} className="input" />{errors.emailContacto && <p className="text-xs text-red-400 mt-1">{errors.emailContacto.message}</p>}</div>
-      <div><label className="label">Teléfono</label><input {...register('telefono')} className="input" placeholder="Ej: +57 300 000 0000" /></div>
+      <div><label htmlFor="TabEmpresa-register-nombre" className="label">Nombre de la empresa *</label><input id="TabEmpresa-register-nombre" {...register('nombre')} className="input" />{errors.nombre && <p className="text-xs text-red-400 mt-1">{errors.nombre.message}</p>}</div>
+      <div><label htmlFor="TabEmpresa-register-nit" className="label">NIT / RUC</label><input id="TabEmpresa-register-nit" {...register('nit')} className="input" placeholder="Ej: 900.123.456-7" /></div>
+      <div><label htmlFor="TabEmpresa-register-emailContacto" className="label">Email de contacto *</label><input id="TabEmpresa-register-emailContacto" type="email" {...register('emailContacto')} className="input" />{errors.emailContacto && <p className="text-xs text-red-400 mt-1">{errors.emailContacto.message}</p>}</div>
+      <div><label htmlFor="TabEmpresa-register-telefono" className="label">Teléfono</label><input id="TabEmpresa-register-telefono" {...register('telefono')} className="input" placeholder="Ej: +57 300 000 0000" /></div>
       <button type="submit" disabled={isSubmitting} className="btn-primary">{isSubmitting ? 'Guardando...' : 'Guardar cambios'}</button>
     </form>
   );
@@ -97,16 +97,16 @@ function TabConfig() {
         <label className="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" {...register('notifEmail')} className="sr-only peer" />
           <div className="w-10 h-6 bg-zinc-600 peer-checked:bg-brand rounded-full transition-colors" />
-          <div className="absolute left-1 top-1 w-4 h-4 bg-surface rounded-full shadow transition-transform peer-checked:translate-x-4" />
+          <div className="absolute left-1 top-1 w-4 h-4 bg-zinc-200 rounded-full shadow transition-transform peer-checked:translate-x-4" />
         </label>
       </div>
       <div>
-        <label className="label">Días de aviso antes del mantenimiento</label>
-        <input type="number" min={1} max={30} {...register('diasAvisoMantenimiento')} className="input max-w-xs" />
+        <label htmlFor="TabConfig-register-diasAvisoMantenimiento" className="label">Días de aviso antes del mantenimiento</label>
+        <input id="TabConfig-register-diasAvisoMantenimiento" type="number" min={1} max={30} {...register('diasAvisoMantenimiento')} className="input max-w-xs" />
       </div>
       <div>
-        <label className="label">Zona horaria</label>
-        <select {...register('zonaHoraria')} className="input">
+        <label htmlFor="TabConfig-register-zonaHoraria" className="label">Zona horaria</label>
+        <select id="TabConfig-register-zonaHoraria" {...register('zonaHoraria')} className="input">
           <option value="America/Bogota">Bogotá (COT)</option>
           <option value="America/Lima">Lima (PET)</option>
           <option value="America/Mexico_City">Ciudad de México (CST)</option>
@@ -115,8 +115,8 @@ function TabConfig() {
         </select>
       </div>
       <div>
-        <label className="label">Moneda</label>
-        <select {...register('moneda')} className="input">
+        <label htmlFor="TabConfig-register-moneda" className="label">Moneda</label>
+        <select id="TabConfig-register-moneda" {...register('moneda')} className="input">
           <option value="COP">COP – Peso colombiano</option>
           <option value="USD">USD – Dólar americano</option>
           <option value="MXN">MXN – Peso mexicano</option>
@@ -209,9 +209,9 @@ function TabSedes() {
       {/* Modal nueva sede */}
       <Modal open={sedeModal} onClose={() => setSedeModal(false)} title="Nueva sede">
         <form onSubmit={sedeForm.handleSubmit(crearSede)} className="space-y-4">
-          <div><label className="label">Nombre *</label><input {...sedeForm.register('nombre')} className="input" />{sedeForm.formState.errors.nombre && <p className="text-xs text-red-400 mt-1">{sedeForm.formState.errors.nombre.message}</p>}</div>
-          <div><label className="label">Dirección</label><input {...sedeForm.register('direccion')} className="input" /></div>
-          <div><label className="label">Ciudad</label><input {...sedeForm.register('ciudad')} className="input" /></div>
+          <div><label htmlFor="TabSedes-sedeForm-register-nombre" className="label">Nombre *</label><input id="TabSedes-sedeForm-register-nombre" {...sedeForm.register('nombre')} className="input" />{sedeForm.formState.errors.nombre && <p className="text-xs text-red-400 mt-1">{sedeForm.formState.errors.nombre.message}</p>}</div>
+          <div><label htmlFor="TabSedes-sedeForm-register-direccion" className="label">Dirección</label><input id="TabSedes-sedeForm-register-direccion" {...sedeForm.register('direccion')} className="input" /></div>
+          <div><label htmlFor="TabSedes-sedeForm-register-ciudad" className="label">Ciudad</label><input id="TabSedes-sedeForm-register-ciudad" {...sedeForm.register('ciudad')} className="input" /></div>
           <div className="flex gap-3"><button type="button" onClick={() => setSedeModal(false)} className="btn-secondary flex-1">Cancelar</button><button type="submit" disabled={sedeForm.formState.isSubmitting} className="btn-primary flex-1">Crear sede</button></div>
         </form>
       </Modal>
@@ -219,8 +219,8 @@ function TabSedes() {
       {/* Modal nueva ubicación */}
       <Modal open={!!ubModal} onClose={() => setUbModal(null)} title="Nueva ubicación" size="sm">
         <form onSubmit={ubForm.handleSubmit(crearUb)} className="space-y-4">
-          <div><label className="label">Nombre *</label><input {...ubForm.register('nombre')} className="input" placeholder="Ej: Sala de servidores" />{ubForm.formState.errors.nombre && <p className="text-xs text-red-400 mt-1">{ubForm.formState.errors.nombre.message}</p>}</div>
-          <div><label className="label">Descripción</label><input {...ubForm.register('descripcion')} className="input" /></div>
+          <div><label htmlFor="TabSedes-ubForm-register-nombre" className="label">Nombre *</label><input id="TabSedes-ubForm-register-nombre" {...ubForm.register('nombre')} className="input" placeholder="Ej: Sala de servidores" />{ubForm.formState.errors.nombre && <p className="text-xs text-red-400 mt-1">{ubForm.formState.errors.nombre.message}</p>}</div>
+          <div><label htmlFor="TabSedes-ubForm-register-descripcion" className="label">Descripción</label><input id="TabSedes-ubForm-register-descripcion" {...ubForm.register('descripcion')} className="input" /></div>
           <div className="flex gap-3"><button type="button" onClick={() => setUbModal(null)} className="btn-secondary flex-1">Cancelar</button><button type="submit" disabled={ubForm.formState.isSubmitting} className="btn-primary flex-1">Crear</button></div>
         </form>
       </Modal>

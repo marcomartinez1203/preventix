@@ -28,6 +28,7 @@ Las funciones de correo y análisis predictivo quedan fuera del alcance de la su
 
 ```sh
 npm run dev:frontend
+npm run test --workspace=frontend
 npm run lint --workspace=frontend
 npm run build:frontend
 ```

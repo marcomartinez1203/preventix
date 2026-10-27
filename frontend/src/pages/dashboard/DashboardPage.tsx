@@ -15,21 +15,17 @@ function KpiCard({
   color: 'brand' | 'green' | 'yellow' | 'red'; sub?: string;
 }) {
   const colors = {
-    brand:   'bg-brand/10 text-brand',
+    brand:   'bg-raised text-zinc-300',
     green:  'bg-emerald-400/10 text-emerald-400',
     yellow: 'bg-brand/10 text-brand',
     red:    'bg-red-400/10 text-red-400',
   };
   return (
-    <div className="card kpi-card p-5 pt-6 flex flex-col sm:flex-row items-start gap-4">
+    <div className="card kpi-card p-5 flex items-start gap-3 min-w-0">
       <div className={`p-3 rounded-xl ${colors[color]}`}>
-        <Icon className="w-6 h-6" />
+        <Icon aria-hidden="true" className="w-5 h-5" />
       </div>
-      <div>
-        <p className="text-sm text-zinc-400">{label}</p>
-        <p className="text-3xl font-bold tracking-tight text-zinc-100 mt-1">{value}</p>
-        {sub && <p className="text-xs text-zinc-400 mt-0.5">{sub}</p>}
-      </div>
+      <dl className="min-w-0"><dt className="text-sm text-zinc-400">{label}</dt><dd className="text-3xl font-semibold tracking-tight tabular-nums text-zinc-100 mt-2">{value}</dd>{sub && <dd className="text-xs text-zinc-400 mt-1">{sub}</dd>}</dl>
     </div>
   );
 }
@@ -37,17 +33,17 @@ function KpiCard({
 export default function DashboardPage() {
   const { empresa } = useAuthStore();
 
-  const { data: resumen, isLoading: loadingResumen } = useQuery<DashboardResumen>({
+  const { data: resumen, isLoading: loadingResumen, isError: errorResumen, refetch: retryResumen } = useQuery<DashboardResumen>({
     queryKey: ['dashboard-resumen'],
     queryFn: () => dashboardApi.resumen().then((r) => r.data.data ?? r.data),
   });
 
-  const { data: proximos = [], isLoading: loadingProximos } = useQuery<Mantenimiento[]>({
+  const { data: proximos = [], isLoading: loadingProximos, isError: errorProximos, refetch: retryProximos } = useQuery<Mantenimiento[]>({
     queryKey: ['mantenimientos-proximos'],
     queryFn: () => dashboardApi.mantenimientosProximos().then((r) => r.data.data ?? r.data),
   });
 
-  const { data: recurrentes = [], isLoading: loadingRecurrentes } = useQuery<{ equipoId: string; nombre: string; totalFallas: number }[]>({
+  const { data: recurrentes = [], isLoading: loadingRecurrentes, isError: errorRecurrentes, refetch: retryRecurrentes } = useQuery<{ equipoId: string; nombre: string; totalFallas: number }[]>({
     queryKey: ['equipos-recurrentes'],
     queryFn: () => dashboardApi.equiposRecurrentes().then((r) => r.data.data ?? r.data),
   });
@@ -56,14 +52,15 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="dashboard-hero card relative overflow-hidden p-6 sm:p-8">
-        <Monitor aria-hidden="true" className="absolute right-6 top-1/2 -translate-y-1/2 w-52 h-52 text-brand/[0.06] hidden lg:block pointer-events-none" strokeWidth={1} />
-        <div className="relative"><p className="eyebrow mb-3">{empresa?.nombre || 'Tu espacio de trabajo'}</p><h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-100">Centro de control</h1><p className="text-zinc-400 text-sm sm:text-base mt-3 max-w-xl">El estado de tus equipos y lo que viene, de un vistazo.</p><div className="flex flex-wrap gap-3 mt-6"><Link to="/equipos" className="btn-primary text-sm inline-flex items-center gap-2"><Monitor className="w-4 h-4" />Ver inventario</Link><Link to="/mantenimientos" className="btn-secondary text-sm inline-flex items-center gap-2"><Wrench className="w-4 h-4" />Ver mantenimientos</Link></div></div>
-      </section>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div><p className="text-sm text-zinc-400 mb-2">{empresa?.nombre || 'Tu espacio de trabajo'}</p><h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Resumen de mantenimiento</h1><p className="text-sm text-zinc-400 mt-2">Equipos, incidencias y próximas tareas.</p></div>
+        <Link to="/reportes" className="btn-secondary text-sm inline-flex items-center gap-2">Consultar reportes</Link>
+      </header>
+      {!!resumen?.mantenimientosVencidos && <section aria-label="Tareas que requieren atención" className="card p-5 border-l-[3px] border-l-red-400 flex flex-wrap items-center justify-between gap-4"><div className="flex items-start gap-3"><Clock aria-hidden="true" className="w-5 h-5 text-red-400 mt-0.5 shrink-0" /><div><h2 className="font-semibold">{resumen.mantenimientosVencidos} mantenimiento{resumen.mantenimientosVencidos === 1 ? '' : 's'} vencido{resumen.mantenimientosVencidos === 1 ? '' : 's'}</h2><p className="text-sm text-zinc-400 mt-1">Revisa las tareas pendientes y actualiza su estado.</p></div></div><Link to="/mantenimientos?estado=vencido" className="btn-primary text-sm">Revisar vencidos</Link></section>}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {loadingResumen ? (
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        {errorResumen ? <div role="alert" className="card p-5 sm:col-span-2 xl:col-span-4"><p>No se pudo cargar el resumen.</p><button className="record-action mt-3" onClick={() => retryResumen()}>Reintentar</button></div> : loadingResumen ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
           <>
@@ -80,10 +77,10 @@ export default function DashboardPage() {
         {/* Próximos mantenimientos */}
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Wrench className="w-5 h-5 text-brand" />
+            <Wrench className="w-5 h-5 text-zinc-400" />
             <h2 className="font-semibold text-zinc-100">Próximos mantenimientos</h2>
           </div>
-          {loadingProximos ? (
+          {errorProximos ? <p role="alert" className="text-sm">No se pudieron cargar las tareas. <button className="min-h-11 text-brand" onClick={() => retryProximos()}>Reintentar</button></p> : loadingProximos ? (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="animate-pulse flex gap-3">
@@ -97,7 +94,7 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {proximos.slice(0, 5).map((m) => (
-                <div key={m.id} className="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+                <div key={m.id} className="flex flex-wrap gap-3 items-center justify-between py-3 border-b border-zinc-800 last:border-0">
                   <div>
                     <p className="text-sm font-medium text-zinc-200 leading-tight">{m.titulo}</p>
                     <p className="text-xs text-zinc-400">{m.equipo.nombre}</p>
@@ -118,10 +115,10 @@ export default function DashboardPage() {
         {/* Equipos con más fallas */}
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-brand" />
+            <TrendingUp className="w-5 h-5 text-zinc-400" />
             <h2 className="font-semibold text-zinc-100">Equipos con más fallas</h2>
           </div>
-          {loadingRecurrentes ? (
+          {errorRecurrentes ? <p role="alert" className="text-sm">No se pudo cargar la recurrencia. <button className="min-h-11 text-brand" onClick={() => retryRecurrentes()}>Reintentar</button></p> : loadingRecurrentes ? (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="animate-pulse space-y-1">
@@ -142,7 +139,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="h-1.5 bg-raised rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-brand rounded-full transition-all"
+                      className="h-full bg-zinc-400 rounded-full transition-all"
                       style={{ width: `${(e.totalFallas / maxFallas) * 100}%` }}
                     />
                   </div>

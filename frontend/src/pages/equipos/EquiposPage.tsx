@@ -1,3 +1,4 @@
+import RecordCard from '../../components/common/RecordCard';
 import { Link } from 'react-router-dom';
 import Pagination, { usePagination } from '../../components/common/Pagination';
 import { useState } from 'react';
@@ -140,8 +141,8 @@ function EquipoForm({
 
   const field = (label: string, key: keyof FormData, type = 'text', opts?: object) => (
     <div>
-      <label className="label">{label}</label>
-      <input type={type} {...register(key)} className="input" {...opts} />
+      <label htmlFor={`equipo-${key}`} className="label">{label}</label>
+      <input id={`equipo-${key}`} type={type} {...register(key)} className="input" {...opts} />
       {errors[key] && <p className="text-xs text-red-400 mt-1">{errors[key]?.message as string}</p>}
     </div>
   );
@@ -151,8 +152,8 @@ function EquipoForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">{field('Nombre *', 'nombre')}</div>
         <div>
-          <label className="label">Tipo</label>
-          <select {...register('tipo')} className="input">
+          <label htmlFor="EquipoForm-register-tipo" className="label">Tipo</label>
+          <select id="EquipoForm-register-tipo" {...register('tipo')} className="input">
             <option value="desktop">Desktop</option>
             <option value="laptop">Laptop</option>
             <option value="servidor">Servidor</option>
@@ -160,8 +161,8 @@ function EquipoForm({
           </select>
         </div>
         <div>
-          <label className="label">Estado</label>
-          <select {...register('estado')} className="input">
+          <label htmlFor="EquipoForm-register-estado" className="label">Estado</label>
+          <select id="EquipoForm-register-estado" {...register('estado')} className="input">
             <option value="activo">Activo</option>
             <option value="en_mantenimiento">En mantenimiento</option>
             <option value="fuera_servicio">Fuera de servicio</option>
@@ -177,29 +178,29 @@ function EquipoForm({
         {field('Almacenamiento (GB)', 'almacenamientoGb', 'number')}
         {field('Fecha adquisición', 'fechaAdquisicion', 'date')}
         <div>
-          <label className="label">Sede</label>
-          <select {...register('sedeId')} className="input">
+          <label htmlFor="EquipoForm-register-sedeId" className="label">Sede</label>
+          <select id="EquipoForm-register-sedeId" {...register('sedeId')} className="input">
             <option value="">Sin asignar</option>
             {sedes.map((s: { id: string; nombre: string }) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
           </select>
         </div>
         <div>
-          <label className="label">Usuario asignado</label>
-          <select {...register('usuarioAsignadoId')} className="input">
+          <label htmlFor="EquipoForm-register-usuarioAsignadoId" className="label">Usuario asignado</label>
+          <select id="EquipoForm-register-usuarioAsignadoId" {...register('usuarioAsignadoId')} className="input">
             <option value="">Sin asignar</option>
             {usuarios.map((u: { id: string; nombre: string }) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
           </select>
         </div>
         <div className="col-span-2">
-          <label className="label">Responsable</label>
-          <select {...register('responsableId')} className="input">
+          <label htmlFor="EquipoForm-register-responsableId" className="label">Responsable</label>
+          <select id="EquipoForm-register-responsableId" {...register('responsableId')} className="input">
             <option value="">Sin asignar</option>
             {usuarios.map((u: { id: string; nombre: string }) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
           </select>
         </div>
         <div className="col-span-2">
-          <label className="label">Notas</label>
-          <textarea {...register('notas')} rows={3} className="input resize-none" />
+          <label htmlFor="EquipoForm-register-notas" className="label">Notas</label>
+          <textarea id="EquipoForm-register-notas" {...register('notas')} rows={3} className="input resize-none" />
         </div>
       </div>
       <div className="flex gap-3 pt-2">
@@ -237,12 +238,18 @@ export default function EquiposPage() {
   const pagination = usePagination(equipos, JSON.stringify(params));
 
   const archivar = useMutation({
-    mutationFn: (id: string) => equiposApi.archivar(id),
-    onSuccess: () => { qc.invalidateQueries(); toast.success('Equipo archivado'); },
+    mutationFn: (equipo: Equipo) => equiposApi.archivar(equipo.id),
+    onSuccess: (_result, equipo) => { qc.invalidateQueries(); toast.success(`${equipo.nombre} archivado`, { label: 'Deshacer', onClick: async () => { await equiposApi.actualizar(equipo.id, { estado: equipo.estado }); await qc.invalidateQueries(); toast.success('Equipo restaurado'); } }); },
     onError: () => toast.error('Error al archivar'),
   });
 
   const puedeEditar = ['administrador', 'responsable'].includes(usuario?.rol ?? '');
+  const actions = (equipo: Equipo, compact = false) => <>
+    <button className={compact ? 'record-action' : 'icon-button'} aria-label={`Ver historial de ${equipo.nombre}`} title="Ver historial" onClick={() => setHistorialEquipo(equipo)}><Clock className="w-4 h-4" />{compact && 'Historial'}</button>
+    {puedeEditar && <><button className={compact ? 'record-action' : 'icon-button'} aria-label={`Editar ${equipo.nombre}`} title="Editar" onClick={() => { setSelected(equipo); setSlideover('edit'); }}><Edit2 className="w-4 h-4" />{compact && 'Editar'}</button>
+    {!equipo.archivado && <button disabled={archivar.isPending} className={compact ? 'record-action' : 'icon-button'} aria-label={`Archivar ${equipo.nombre}`} title="Archivar" onClick={() => archivar.mutate(equipo)}><Archive className="w-4 h-4" />{compact && 'Archivar'}</button>}</>}
+  </>;
+
 
   return (
     <div className="space-y-5">
@@ -269,23 +276,23 @@ export default function EquiposPage() {
       </div>
 
       {/* Filtros */}
-      <div className="card p-4 flex flex-wrap gap-3">
+      <div className="card p-4 filter-bar">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input
-            type="text" placeholder="Buscar por nombre o serie..."
+            aria-label="Buscar equipos por nombre o serie" type="text" placeholder="Buscar por nombre o serie..."
             value={search} onChange={(e) => setSearch(e.target.value)}
             className="input pl-9"
           />
         </div>
-        <select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} className="input w-auto">
+        <select aria-label="Filtrar por tipo" value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} className="input w-auto">
           <option value="">Todos los tipos</option>
           <option value="desktop">Desktop</option>
           <option value="laptop">Laptop</option>
           <option value="servidor">Servidor</option>
           <option value="otro">Otro</option>
         </select>
-        <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} className="input w-auto">
+        <select aria-label="Filtrar por estado" value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} className="input w-auto">
           <option value="">Todos los estados</option>
           <option value="activo">Activo</option>
           <option value="en_mantenimiento">En mantenimiento</option>
@@ -299,18 +306,20 @@ export default function EquiposPage() {
         {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : equipos.length === 0 ? (
-          <EmptyState
-            title="Sin equipos registrados"
-            description="Registra el primer equipo para comenzar a gestionar el mantenimiento."
-            action={puedeEditar ? <button onClick={() => setSlideover('create')} className="btn-primary">+ Registrar equipo</button> : undefined}
-          />
+          Object.keys(params).length ? <EmptyState title="Sin coincidencias" description="Prueba otra búsqueda o quita los filtros para ver todos los registros." action={<button onClick={() => { setSearch(''); setTipoFiltro(''); setEstadoFiltro(''); }} className="btn-secondary">Limpiar filtros</button>} /> : <EmptyState title="Sin equipos registrados" description="Registra el primer equipo para comenzar." action={puedeEditar ? <button onClick={() => setSlideover('create')} className="btn-primary">Registrar equipo</button> : undefined} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <><div className="sm:hidden">{pagination.visible.map(eq => <RecordCard key={eq.id}
+            title={<Link to={`/equipos/${eq.id}`} className="hover:underline">{eq.nombre}</Link>}
+            subtitle={[eq.marca, eq.modelo].filter(Boolean).join(' ')}
+            badges={<span className={`badge ${estadoColor[eq.estado]}`}>{estadoLabel[eq.estado]}</span>}
+            fields={[{ label: 'Sede', value: eq.sede?.nombre }, { label: 'Responsable', value: eq.responsable?.nombre }, { label: 'Serie', value: eq.numeroSerie }, { label: 'Tipo', value: eq.tipo }]}
+            actions={actions(eq, true)} />)}</div>
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-sm"><caption className="sr-only">Inventario de equipos</caption>
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Equipo', 'Marca / Modelo', 'Sede', 'Responsable', 'Estado', 'Adquisición', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -347,42 +356,14 @@ export default function EquiposPage() {
                         {eq.fechaAdquisicion ? format(new Date(eq.fechaAdquisicion), 'dd MMM yyyy', { locale: es }) : '—'}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => setHistorialEquipo(eq)}
-                            title="Ver historial"
-                            className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-brand transition-colors"
-                          >
-                            <Clock className="w-4 h-4" />
-                          </button>
-                          {puedeEditar && (
-                            <>
-                              <button
-                                onClick={() => { setSelected(eq); setSlideover('edit'); }}
-                                title="Editar"
-                                className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-zinc-200 transition-colors"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                              {!eq.archivado && (
-                                <button
-                                  onClick={() => { if (window.confirm(`¿Archivar ${eq.nombre}? Podrás recuperarlo desde el filtro Archivados.`)) archivar.mutate(eq.id); }}
-                                  title="Archivar"
-                                  className="p-1.5 rounded text-zinc-400 hover:bg-red-400/10 hover:text-red-400 transition-colors"
-                                >
-                                  <Archive className="w-4 h-4" />
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </div>
+                        <div className="flex items-center gap-1">{actions(eq)}</div>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-          </div>
+          </div></>
         )}
       </div>
       <Pagination {...pagination} />

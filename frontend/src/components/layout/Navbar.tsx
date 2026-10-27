@@ -7,6 +7,7 @@ import { notificacionesApi } from '../../api';
 import { useAuthStore } from '../../stores/authStore';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale/es';
+import { useToast } from '../../hooks/useToast';
 
 export default function Navbar({ onMenu }: { onMenu: () => void }) {
   const { usuario } = useAuthStore();
@@ -15,8 +16,10 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
+  const toast = useToast();
+  const bell = useRef<HTMLButtonElement>(null);
 
-  const { data: notifs = [] } = useQuery({
+  const { data: notifs = [], isError, isLoading, refetch } = useQuery({
     queryKey: ['notificaciones'],
     queryFn: () => notificacionesApi.listar().then((r) => r.data.data ?? r.data),
     refetchInterval: 30_000,
@@ -27,30 +30,34 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
   const marcarLeida = useMutation({
     mutationFn: (id: string) => notificacionesApi.leer(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notificaciones'] }),
+    onError: () => toast.error('No se pudo marcar la notificación. Vuelve a intentarlo.'),
   });
 
   const marcarTodas = useMutation({
     mutationFn: () => notificacionesApi.leerTodas(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notificaciones'] }),
+    onError: () => toast.error('No se pudo marcar la notificación. Vuelve a intentarlo.'),
   });
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape' && ref.current?.contains(document.activeElement)) { setOpen(false); bell.current?.focus(); } };
+    document.addEventListener('keydown', escape);
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('keydown', escape); };
   }, []);
 
   return (
-    <header className="h-[76px] bg-surface/80 border-b border-line flex items-center justify-between px-4 md:px-7 gap-3 shrink-0">
-      <div className="flex items-center gap-3 min-w-0"><button className="md:hidden p-2 -ml-2 text-zinc-300 rounded-lg" aria-label="Abrir menú" onClick={onMenu}><Menu className="w-5 h-5" /></button><div className="md:hidden"><BrandLogo compact /></div><div className="min-w-0"><p className="text-[10px] text-zinc-400 uppercase tracking-[0.15em] hidden sm:block">Preventix / Espacio de trabajo</p><p className="text-sm font-medium text-zinc-100 truncate">{section}</p></div></div>
+    <header className="workspace-header bg-surface border-b border-line flex items-center justify-between px-4 md:px-7 gap-3 shrink-0">
+      <div className="flex items-center gap-3 min-w-0"><button className="icon-button md:hidden -ml-2" aria-label="Abrir menú" onClick={onMenu}><Menu className="w-5 h-5" /></button><div className="md:hidden"><BrandLogo compact /></div><div className="min-w-0"><p className="text-sm font-medium text-zinc-100 truncate">{section}</p></div></div>
       <div className="flex items-center gap-4">
         {/* Campana */}
         <div ref={ref} className="relative">
           <button
-            aria-label="Notificaciones" aria-expanded={open} onClick={() => setOpen((v) => !v)}
-            className="relative p-2 rounded-lg text-zinc-400 hover:bg-raised transition-colors"
+            ref={bell} aria-controls="notificaciones" aria-label={`Notificaciones, ${noLeidas} sin leer`} aria-expanded={open} onClick={() => setOpen((v) => !v)}
+            className="icon-button relative"
           >
             <Bell className="w-5 h-5" />
             {noLeidas > 0 && (
@@ -61,33 +68,33 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
           </button>
 
           {open && (
-            <div className="absolute right-0 mt-4 w-80 max-w-[calc(100vw-2rem)] bg-surface rounded-xl shadow-xl border border-line z-50">
+            <section id="notificaciones" aria-label="Notificaciones" className="fixed left-4 right-4 top-[calc(80px+env(safe-area-inset-top))] sm:absolute sm:left-auto sm:top-full sm:mt-3 sm:w-96 bg-elevated rounded-2xl shadow-xl border border-line z-50">
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
                 <span className="text-sm font-semibold text-zinc-100">Notificaciones</span>
                 <div className="flex items-center gap-2 rounded-xl">
                   {noLeidas > 0 && (
                     <button
-                      onClick={() => marcarTodas.mutate()}
-                      className="text-xs text-brand hover:text-brand flex items-center gap-1"
+                      disabled={marcarTodas.isPending} onClick={() => marcarTodas.mutate()}
+                      className="min-h-11 px-2 text-xs text-brand hover:text-brand flex items-center gap-1"
                     >
                       <CheckCheck className="w-3.5 h-3.5" />
                       Leer todas
                     </button>
                   )}
-                  <button onClick={() => setOpen(false)} aria-label="Cerrar notificaciones" className="text-zinc-400 hover:text-zinc-300">
+                  <button onClick={() => setOpen(false)} aria-label="Cerrar notificaciones" className="icon-button">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
               <div className="max-h-72 overflow-y-auto divide-y divide-zinc-800">
-                {notifs.length === 0 ? (
+                {isError ? <p role="alert" className="p-5 text-sm text-zinc-300">No se pudieron cargar las notificaciones. <button className="text-brand min-h-11" onClick={() => refetch()}>Reintentar</button></p> : isLoading ? <p className="p-5 text-sm text-zinc-400" role="status">Cargando notificaciones…</p> : notifs.length === 0 ? (
                   <p className="text-sm text-zinc-400 text-center py-8">Sin notificaciones</p>
                 ) : (
                   notifs.slice(0, 5).map((n: { id: string; titulo: string; mensaje: string; leida: boolean; createdAt: string }) => (
-                    <div
+                    <button type="button" disabled={n.leida || marcarLeida.isPending}
                       key={n.id}
                       onClick={() => !n.leida && marcarLeida.mutate(n.id)}
-                      className={`px-4 py-3 cursor-pointer hover:bg-ink transition-colors ${!n.leida ? 'bg-brand/10' : ''}`}
+                      className={`w-full text-left px-4 py-3 disabled:cursor-default hover:bg-ink transition-colors ${!n.leida ? 'bg-brand/10' : ''}`}
                     >
                       <div className="flex items-start gap-2">
                         {!n.leida && <span className="mt-1.5 w-2 h-2 bg-brand rounded-full shrink-0" />}
@@ -99,16 +106,16 @@ export default function Navbar({ onMenu }: { onMenu: () => void }) {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>
-            </div>
+            </section>
           )}
         </div>
 
         {/* Usuario */}
-        <Link to="/perfil" aria-label="Mi perfil" className="flex items-center gap-2 rounded-xl">
+        <Link to="/perfil" aria-label="Mi perfil" className="flex items-center gap-2 rounded-xl min-h-11 min-w-11 justify-center">
           <div className="w-8 h-8 bg-brand rounded-xl flex items-center justify-center text-ink text-sm font-semibold">
             {usuario?.nombre?.charAt(0).toUpperCase()}
           </div>

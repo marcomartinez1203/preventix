@@ -1,7 +1,8 @@
+import RecordCard from '../../components/common/RecordCard';
 import Pagination, { usePagination } from '../../components/common/Pagination';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, AlertTriangle } from 'lucide-react';
+import { Plus, Search, AlertTriangle, Eye, Edit2 } from 'lucide-react';
 import { fallasApi, equiposApi, usuariosApi } from '../../api';
 import type { Falla, CategoriaFalla, PrioridadFalla, EstadoFalla } from '../../types';
 import { format } from 'date-fns';
@@ -78,27 +79,27 @@ function FallaForm({ falla, onClose }: { falla?: Falla; onClose: () => void }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="label">Equipo *</label>
-        <select {...register('equipoId')} className="input">
+        <label htmlFor="FallaForm-register-equipoId" className="label">Equipo *</label>
+        <select id="FallaForm-register-equipoId" {...register('equipoId')} className="input">
           <option value="">Seleccionar equipo...</option>
           {equipos.map((e: { id: string; nombre: string }) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
         </select>
         {errors.equipoId && <p className="text-xs text-red-400 mt-1">{errors.equipoId.message}</p>}
       </div>
       <div>
-        <label className="label">Título *</label>
-        <input {...register('titulo')} className="input" placeholder="Ej: Pantalla no enciende" />
+        <label htmlFor="FallaForm-register-titulo" className="label">Título *</label>
+        <input id="FallaForm-register-titulo" {...register('titulo')} className="input" placeholder="Ej: Pantalla no enciende" />
         {errors.titulo && <p className="text-xs text-red-400 mt-1">{errors.titulo.message}</p>}
       </div>
       <div>
-        <label className="label">Descripción *</label>
-        <textarea {...register('descripcion')} rows={3} className="input resize-none" placeholder="Describe el problema en detalle..." />
+        <label htmlFor="FallaForm-register-descripcion" className="label">Descripción *</label>
+        <textarea id="FallaForm-register-descripcion" {...register('descripcion')} rows={3} className="input resize-none" placeholder="Describe el problema en detalle..." />
         {errors.descripcion && <p className="text-xs text-red-400 mt-1">{errors.descripcion.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label">Categoría</label>
-          <select {...register('categoria')} className="input">
+          <label htmlFor="FallaForm-register-categoria" className="label">Categoría</label>
+          <select id="FallaForm-register-categoria" {...register('categoria')} className="input">
             <option value="hardware">Hardware</option>
             <option value="software">Software</option>
             <option value="red">Red</option>
@@ -107,8 +108,8 @@ function FallaForm({ falla, onClose }: { falla?: Falla; onClose: () => void }) {
           </select>
         </div>
         <div>
-          <label className="label">Prioridad</label>
-          <select {...register('prioridad')} className="input">
+          <label htmlFor="FallaForm-register-prioridad" className="label">Prioridad</label>
+          <select id="FallaForm-register-prioridad" {...register('prioridad')} className="input">
             <option value="baja">Baja</option>
             <option value="media">Media</option>
             <option value="alta">Alta</option>
@@ -117,19 +118,19 @@ function FallaForm({ falla, onClose }: { falla?: Falla; onClose: () => void }) {
         </div>
       </div>
       <div>
-        <label className="label">Técnico asignado</label>
-        <select {...register('asignadoA')} className="input">
+        <label htmlFor="FallaForm-register-asignadoA" className="label">Técnico asignado</label>
+        <select id="FallaForm-register-asignadoA" {...register('asignadoA')} className="input">
           <option value="">Sin asignar</option>
           {usuarios.map((u: { id: string; nombre: string }) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
         </select>
       </div>
       <div>
-        <label className="label">Diagnóstico</label>
-        <textarea {...register('diagnostico')} rows={2} className="input resize-none" />
+        <label htmlFor="FallaForm-register-diagnostico" className="label">Diagnóstico</label>
+        <textarea id="FallaForm-register-diagnostico" {...register('diagnostico')} rows={2} className="input resize-none" />
       </div>
       <div>
-        <label className="label">Solución aplicada</label>
-        <textarea {...register('solucionAplicada')} rows={2} className="input resize-none" />
+        <label htmlFor="FallaForm-register-solucionAplicada" className="label">Solución aplicada</label>
+        <textarea id="FallaForm-register-solucionAplicada" {...register('solucionAplicada')} rows={2} className="input resize-none" />
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancelar</button>
@@ -211,6 +212,11 @@ export default function FallasPage() {
   });
   const pagination = usePagination(fallas, JSON.stringify(params));
 
+  const actions = (item: Falla, compact = false) => <>
+    <button className={compact ? 'record-action' : 'icon-button'} aria-label={`Ver detalle de ${item.titulo}`} title="Ver detalle" onClick={() => setDetalle(item)}><Eye className="w-4 h-4" />{compact && 'Ver detalle'}</button>
+    <button className={compact ? 'record-action' : 'icon-button'} aria-label={`Editar ${item.titulo}`} title="Editar" onClick={() => setEditando(item)}><Edit2 className="w-4 h-4" />{compact && 'Editar'}</button>
+  </>;
+
   return (
     <div className="space-y-5">
       {detalle && <DetalleModal falla={detalle} onClose={() => setDetalle(null)} />}
@@ -228,19 +234,19 @@ export default function FallasPage() {
         </button>
       </div>
 
-      <div className="card p-4 flex flex-wrap gap-3">
+      <div className="card p-4 filter-bar">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input type="text" placeholder="Buscar por título..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
+          <input aria-label="Buscar por título" type="text" placeholder="Buscar por título..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
         </div>
-        <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} className="input w-auto">
+        <select aria-label="Filtrar por estado" value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} className="input w-auto">
           <option value="">Todos los estados</option>
           <option value="abierta">Abierta</option>
           <option value="en_proceso">En proceso</option>
           <option value="resuelta">Resuelta</option>
           <option value="cerrada">Cerrada</option>
         </select>
-        <select value={categoriaFiltro} onChange={(e) => setCategoriaFiltro(e.target.value)} className="input w-auto">
+        <select aria-label="Filtrar por categoría" value={categoriaFiltro} onChange={(e) => setCategoriaFiltro(e.target.value)} className="input w-auto">
           <option value="">Todas las categorías</option>
           <option value="hardware">Hardware</option>
           <option value="software">Software</option>
@@ -248,7 +254,7 @@ export default function FallasPage() {
           <option value="perifericos">Periféricos</option>
           <option value="otro">Otro</option>
         </select>
-        <select value={prioridadFiltro} onChange={(e) => setPrioridadFiltro(e.target.value)} className="input w-auto">
+        <select aria-label="Filtrar por prioridad" value={prioridadFiltro} onChange={(e) => setPrioridadFiltro(e.target.value)} className="input w-auto">
           <option value="">Todas las prioridades</option>
           <option value="baja">Baja</option>
           <option value="media">Media</option>
@@ -261,14 +267,19 @@ export default function FallasPage() {
         {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : fallas.length === 0 ? (
-          <EmptyState icon={<AlertTriangle className="w-14 h-14" />} title="Sin fallas registradas" description="Reporta la primera falla para comenzar el seguimiento." action={<button onClick={() => setSlideover(true)} className="btn-primary">+ Reportar falla</button>} />
+          Object.keys(params).length ? <EmptyState title="Sin coincidencias" description="Prueba otra búsqueda o quita los filtros para ver todos los registros." action={<button onClick={() => { setSearch(''); setEstadoFiltro(''); setCategoriaFiltro(''); setPrioridadFiltro(''); }} className="btn-secondary">Limpiar filtros</button>} /> : <EmptyState icon={<AlertTriangle className="w-14 h-14" />} title="Sin fallas registradas" description="Reporta una falla para comenzar el seguimiento." action={<button onClick={() => setSlideover(true)} className="btn-primary">Reportar falla</button>} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <><div className="sm:hidden">{pagination.visible.map(f => <RecordCard key={f.id}
+            title={f.titulo} subtitle={f.equipo.nombre}
+            badges={<><span className={`badge ${estadoFallaColor[f.estado]}`}>{f.estado.replace('_', ' ')}</span><span className={`badge ${prioridadColor[f.prioridad]}`}>Prioridad {f.prioridad}</span></>}
+            fields={[{ label: 'Categoría', value: f.categoria }, { label: 'Técnico', value: f.tecnico?.nombre }, { label: 'Reportado por', value: f.reportador.nombre }, { label: 'Fecha', value: format(new Date(f.fechaReporte), 'dd MMM yyyy', { locale: es }) }]}
+            actions={actions(f, true)} />)}</div>
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-sm"><caption className="sr-only">Fallas registradas</caption>
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Título', 'Equipo', 'Prioridad', 'Estado', 'Reportado por', 'Técnico', 'Fecha', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -286,16 +297,13 @@ export default function FallasPage() {
                     <td className="px-4 py-3 text-zinc-300">{f.tecnico?.nombre ?? <span className="text-zinc-400">—</span>}</td>
                     <td className="px-4 py-3 text-xs text-zinc-400">{format(new Date(f.fechaReporte), 'dd MMM yyyy', { locale: es })}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-1">
-                        <button onClick={() => setDetalle(f)} className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-brand transition-colors" title="Ver detalle"><AlertTriangle className="w-4 h-4" /></button>
-                        <button onClick={() => setEditando(f)} className="p-1.5 rounded text-zinc-400 hover:bg-raised transition-colors" title="Editar">✏️</button>
-                      </div>
+                      <div className="flex gap-1">{actions(f)}</div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </div></>
         )}
       </div>
       <Pagination {...pagination} />

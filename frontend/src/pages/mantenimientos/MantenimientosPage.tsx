@@ -1,7 +1,9 @@
+import { useSearchParams } from 'react-router-dom';
+import RecordCard from '../../components/common/RecordCard';
 import Pagination, { usePagination } from '../../components/common/Pagination';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Wrench, AlertCircle } from 'lucide-react';
+import { Plus, Search, Wrench, AlertCircle, Eye, Edit2 } from 'lucide-react';
 import { mantenimientosApi, equiposApi, usuariosApi, fallasApi } from '../../api';
 import type { Mantenimiento, TipoMantenimiento, EstadoMantenimiento } from '../../types';
 import { format, isPast, differenceInDays } from 'date-fns';
@@ -86,56 +88,56 @@ function MantForm({ mant, onClose }: { mant?: Mantenimiento; onClose: () => void
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="label">Equipo *</label>
-        <select {...register('equipoId')} className="input">
+        <label htmlFor="MantForm-register-equipoId" className="label">Equipo *</label>
+        <select id="MantForm-register-equipoId" {...register('equipoId')} className="input">
           <option value="">Seleccionar equipo...</option>
           {equipos.map((e: { id: string; nombre: string }) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
         </select>
         {errors.equipoId && <p className="text-xs text-red-400 mt-1">{errors.equipoId.message}</p>}
       </div>
       <div>
-        <label className="label">Título *</label>
-        <input {...register('titulo')} className="input" placeholder="Ej: Mantenimiento preventivo mensual" />
+        <label htmlFor="MantForm-register-titulo" className="label">Título *</label>
+        <input id="MantForm-register-titulo" {...register('titulo')} className="input" placeholder="Ej: Mantenimiento preventivo mensual" />
         {errors.titulo && <p className="text-xs text-red-400 mt-1">{errors.titulo.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label">Tipo</label>
-          <select {...register('tipo')} className="input">
+          <label htmlFor="MantForm-register-tipo" className="label">Tipo</label>
+          <select id="MantForm-register-tipo" {...register('tipo')} className="input">
             <option value="preventivo">Preventivo</option>
             <option value="correctivo">Correctivo</option>
           </select>
         </div>
         <div>
-          <label className="label">Fecha programada *</label>
-          <input type="date" {...register('fechaProgramada')} className="input" />
+          <label htmlFor="MantForm-register-fechaProgramada" className="label">Fecha programada *</label>
+          <input id="MantForm-register-fechaProgramada" type="date" {...register('fechaProgramada')} className="input" />
           {errors.fechaProgramada && <p className="text-xs text-red-400 mt-1">{errors.fechaProgramada.message}</p>}
         </div>
       </div>
       <div>
-        <label className="label">Responsable *</label>
-        <select {...register('responsableId')} className="input">
+        <label htmlFor="MantForm-register-responsableId" className="label">Responsable *</label>
+        <select id="MantForm-register-responsableId" {...register('responsableId')} className="input">
           <option value="">Seleccionar responsable...</option>
           {usuarios.map((u: { id: string; nombre: string }) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
         </select>
         {errors.responsableId && <p className="text-xs text-red-400 mt-1">{errors.responsableId.message}</p>}
       </div>
       <div>
-        <label className="label">Actividades a realizar</label>
-        <textarea {...register('actividades')} rows={3} className="input resize-none" placeholder="Lista de actividades..." />
+        <label htmlFor="MantForm-register-actividades" className="label">Actividades a realizar</label>
+        <textarea id="MantForm-register-actividades" {...register('actividades')} rows={3} className="input resize-none" placeholder="Lista de actividades..." />
       </div>
       <div>
-        <label className="label">Observaciones</label>
-        <textarea {...register('observaciones')} rows={2} className="input resize-none" />
+        <label htmlFor="MantForm-register-observaciones" className="label">Observaciones</label>
+        <textarea id="MantForm-register-observaciones" {...register('observaciones')} rows={2} className="input resize-none" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="label">Costo estimado</label>
-          <input type="number" min="0" step="0.01" {...register('costo')} className="input" placeholder="0" />{errors.costo && <p className="text-xs text-red-400">{errors.costo.message}</p>}
+          <label htmlFor="MantForm-register-costo" className="label">Costo estimado</label>
+          <input id="MantForm-register-costo" type="number" min="0" step="0.01" {...register('costo')} className="input" placeholder="0" />{errors.costo && <p className="text-xs text-red-400">{errors.costo.message}</p>}
         </div>
         <div>
-          <label className="label">Vincular a falla</label>
-          <select {...register('fallaId')} className="input">
+          <label htmlFor="MantForm-register-fallaId" className="label">Vincular a falla</label>
+          <select id="MantForm-register-fallaId" {...register('fallaId')} className="input">
             <option value="">Ninguna</option>
             {fallasDelEquipo.map((f: { id: string; titulo: string }) => <option key={f.id} value={f.id}>{f.titulo}</option>)}
           </select>
@@ -200,7 +202,10 @@ function DetalleModal({ mant, onClose }: { mant: Mantenimiento; onClose: () => v
 
 // ─── Main Page ───────────────────────────────────
 export default function MantenimientosPage() {
-  const [tab, setTab] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('estado') ?? '';
+  const tab = TABS.some(item => item.value === requestedTab) ? requestedTab : '';
+  const setTab = (estado: string) => setSearchParams(previous => { const next = new URLSearchParams(previous); if (estado) next.set('estado', estado); else next.delete('estado'); return next; });
   const [search, setSearch] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('');
   const [slideover, setSlideover] = useState(false);
@@ -219,6 +224,11 @@ export default function MantenimientosPage() {
   const pagination = usePagination(mantenimientos, JSON.stringify(params));
 
   const vencidos = mantenimientos.filter((m) => m.estado === 'vencido').length;
+
+  const actions = (item: Mantenimiento, compact = false) => <>
+    <button className={compact ? 'record-action' : 'icon-button'} aria-label={`Ver detalle de ${item.titulo}`} title="Ver detalle" onClick={() => setDetalle(item)}><Eye className="w-4 h-4" />{compact && 'Ver detalle'}</button>
+    <button className={compact ? 'record-action' : 'icon-button'} aria-label={`Editar ${item.titulo}`} title="Editar" onClick={() => setEditando(item)}><Edit2 className="w-4 h-4" />{compact && 'Editar'}</button>
+  </>;
 
   return (
     <div className="space-y-5">
@@ -249,10 +259,11 @@ export default function MantenimientosPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-line">
+      <div role="group" aria-label="Filtrar mantenimientos por estado" className="status-filter">
         {TABS.map((t) => (
           <button
             key={t.value}
+            aria-pressed={tab === t.value}
             onClick={() => setTab(t.value)}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               tab === t.value
@@ -269,9 +280,9 @@ export default function MantenimientosPage() {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input type="text" placeholder="Buscar por título..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
+          <input aria-label="Buscar por título" type="text" placeholder="Buscar por título..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
         </div>
-        <select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} className="input w-auto">
+        <select aria-label="Filtrar por tipo" value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} className="input w-auto">
           <option value="">Todos los tipos</option>
           <option value="preventivo">Preventivo</option>
           <option value="correctivo">Correctivo</option>
@@ -283,14 +294,19 @@ export default function MantenimientosPage() {
         {isError ? <div role="alert" className="p-6 text-red-400">No se pudieron cargar los datos. <button onClick={() => refetch()} className="underline">Reintentar</button></div> : isLoading ? (
           <div className="p-6"><SkeletonTable rows={5} /></div>
         ) : mantenimientos.length === 0 ? (
-          <EmptyState icon={<Wrench className="w-14 h-14" />} title="Sin mantenimientos" description="Programa el primer mantenimiento." action={<button onClick={() => setSlideover(true)} className="btn-primary">+ Programar</button>} />
+          Object.keys(params).length ? <EmptyState title="Sin coincidencias" description="Prueba otra búsqueda o quita los filtros para ver todos los registros." action={<button onClick={() => { setSearch(''); setTab(''); setTipoFiltro(''); }} className="btn-secondary">Limpiar filtros</button>} /> : <EmptyState icon={<Wrench className="w-14 h-14" />} title="Sin mantenimientos" description="Programa el primer mantenimiento." action={<button onClick={() => setSlideover(true)} className="btn-primary">Programar mantenimiento</button>} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <><div className="sm:hidden">{pagination.visible.map(m => <RecordCard key={m.id}
+            title={m.titulo} subtitle={m.equipo.nombre}
+            badges={<><span className={`badge ${estadoMantColor[m.estado]}`}>{m.estado.replace('_', ' ')}</span><span className="badge bg-raised text-zinc-300">{m.tipo}</span></>}
+            fields={[{ label: 'Fecha programada', value: format(new Date(m.fechaProgramada), 'dd MMM yyyy', { locale: es }) }, { label: 'Responsable', value: m.responsable.nombre }, { label: 'Costo', value: m.costo != null ? `$${Number(m.costo).toLocaleString('es-CO')}` : 'Sin registrar' }]}
+            actions={actions(m, true)} />)}</div>
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-sm"><caption className="sr-only">Mantenimientos programados y su estado</caption>
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Título', 'Equipo', 'Tipo', 'Estado', 'Responsable', 'Fecha programada', 'Costo', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -316,17 +332,14 @@ export default function MantenimientosPage() {
                         {m.costo ? `$${Number(m.costo).toLocaleString('es-CO')}` : '—'}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-1">
-                          <button onClick={() => setDetalle(m)} className="p-1.5 rounded text-zinc-400 hover:bg-raised hover:text-brand transition-colors" title="Ver detalle">👁</button>
-                          <button onClick={() => setEditando(m)} className="p-1.5 rounded text-zinc-400 hover:bg-raised transition-colors" title="Editar">✏️</button>
-                        </div>
+                        <div className="flex gap-1">{actions(m)}</div>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-          </div>
+          </div></>
         )}
       </div>
       <Pagination {...pagination} />

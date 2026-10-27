@@ -64,23 +64,23 @@ function InvitarModal({ onClose }: { onClose: () => void }) {
       <p className="text-sm text-zinc-400 mb-4">Se crea un usuario en el backend. No se envían invitaciones por correo.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="label">Nombre completo *</label>
-          <input {...register('nombre')} className="input" placeholder="Ej: Juan García" />
+          <label htmlFor="InvitarModal-register-nombre" className="label">Nombre completo *</label>
+          <input id="InvitarModal-register-nombre" {...register('nombre')} className="input" placeholder="Ej: Juan García" />
           {errors.nombre && <p className="text-xs text-red-400 mt-1">{errors.nombre.message}</p>}
         </div>
         <div>
-          <label className="label">Email *</label>
-          <input type="email" {...register('email')} className="input" placeholder="correo@empresa.com" />
+          <label htmlFor="InvitarModal-register-email" className="label">Email *</label>
+          <input id="InvitarModal-register-email" type="email" {...register('email')} className="input" placeholder="correo@empresa.com" />
           {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email.message}</p>}
         </div>
         <div>
-          <label className="label">Contraseña inicial *</label>
-          <input type="password" {...register('password')} className="input" placeholder="Mín. 8 chars, 1 mayúscula, 1 número" />
+          <label htmlFor="InvitarModal-register-password" className="label">Contraseña inicial *</label>
+          <input id="InvitarModal-register-password" type="password" {...register('password')} className="input" placeholder="Mín. 8 chars, 1 mayúscula, 1 número" />
           {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password.message}</p>}
         </div>
         <div>
-          <label className="label">Rol *</label>
-          <select {...register('rol')} className="input">
+          <label htmlFor="InvitarModal-register-rol" className="label">Rol *</label>
+          <select id="InvitarModal-register-rol" {...register('rol')} className="input">
             <option value="consulta">Consulta</option>
             <option value="tecnico">Técnico</option>
             <option value="responsable">Responsable</option>
@@ -123,13 +123,13 @@ function EditarModal({ usuario, onClose }: { usuario: UsuarioResumen; onClose: (
     <Modal open onClose={onClose} title={`Editar · ${usuario.nombre}`}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="label">Nombre</label>
-          <input {...register('nombre')} className="input" />
+          <label htmlFor="EditarModal-register-nombre" className="label">Nombre</label>
+          <input id="EditarModal-register-nombre" {...register('nombre')} className="input" />
           {errors.nombre && <p className="text-xs text-red-400 mt-1">{errors.nombre.message}</p>}
         </div>
         <div>
-          <label className="label">Rol</label>
-          <select {...register('rol')} className="input" disabled={esMismoUsuario}>
+          <label htmlFor="EditarModal-register-rol" className="label">Rol</label>
+          <select id="EditarModal-register-rol" {...register('rol')} className="input" disabled={esMismoUsuario}>
             <option value="consulta">Consulta</option>
             <option value="tecnico">Técnico</option>
             <option value="responsable">Responsable</option>
@@ -145,7 +145,7 @@ function EditarModal({ usuario, onClose }: { usuario: UsuarioResumen; onClose: (
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" {...register('activo')} disabled={esMismoUsuario} className="sr-only peer" />
             <div className="w-10 h-6 bg-zinc-600 peer-checked:bg-brand rounded-full peer transition-colors peer-disabled:opacity-50" />
-            <div className="absolute left-1 top-1 w-4 h-4 bg-surface rounded-full shadow transition-transform peer-checked:translate-x-4" />
+            <div className="absolute left-1 top-1 w-4 h-4 bg-zinc-200 rounded-full shadow transition-transform peer-checked:translate-x-4" />
           </label>
         </div>
         <div className="flex gap-3 pt-2">
@@ -210,7 +210,7 @@ export default function UsuariosPage() {
               <thead>
                 <tr className="border-b border-line bg-ink">
                   {['Usuario', 'Rol', 'Tipo', 'Estado', 'Último acceso', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
+                    <th scope="col" key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-3 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>

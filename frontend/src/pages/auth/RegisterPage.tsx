@@ -65,23 +65,23 @@ export default function RegisterPage() {
               <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide mb-3">Empresa</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="label">Nombre de la empresa *</label>
-                  <input {...register('empresa.nombre')} className="input" placeholder="Mi Empresa S.A.S" />
+                  <label htmlFor="RegisterPage-register-empresa-nombre" className="label">Nombre de la empresa *</label>
+                  <input id="RegisterPage-register-empresa-nombre" {...register('empresa.nombre')} className="input" placeholder="Mi Empresa S.A.S" />
                   {errors.empresa?.nombre && <p className="text-red-400 text-xs mt-1">{errors.empresa.nombre.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="label">NIT</label>
-                    <input {...register('empresa.nit')} className="input" placeholder="900123456-7" />
+                    <label htmlFor="RegisterPage-register-empresa-nit" className="label">NIT</label>
+                    <input id="RegisterPage-register-empresa-nit" {...register('empresa.nit')} className="input" placeholder="900123456-7" />
                   </div>
                   <div>
-                    <label className="label">Teléfono</label>
-                    <input {...register('empresa.telefono')} className="input" placeholder="3001234567" />
+                    <label htmlFor="RegisterPage-register-empresa-telefono" className="label">Teléfono</label>
+                    <input id="RegisterPage-register-empresa-telefono" {...register('empresa.telefono')} className="input" placeholder="3001234567" />
                   </div>
                 </div>
                 <div>
-                  <label className="label">Email de contacto *</label>
-                  <input {...register('empresa.emailContacto')} type="email" className="input" placeholder="contacto@empresa.com" />
+                  <label htmlFor="RegisterPage-register-empresa-emailContacto" className="label">Email de contacto *</label>
+                  <input id="RegisterPage-register-empresa-emailContacto" {...register('empresa.emailContacto')} type="email" className="input" placeholder="contacto@empresa.com" />
                   {errors.empresa?.emailContacto && <p className="text-red-400 text-xs mt-1">{errors.empresa.emailContacto.message}</p>}
                 </div>
               </div>
@@ -93,18 +93,18 @@ export default function RegisterPage() {
               <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide mb-3">Administrador</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="label">Tu nombre *</label>
-                  <input {...register('admin.nombre')} className="input" placeholder="Juan Pérez" />
+                  <label htmlFor="RegisterPage-register-admin-nombre" className="label">Tu nombre *</label>
+                  <input id="RegisterPage-register-admin-nombre" {...register('admin.nombre')} className="input" placeholder="Juan Pérez" />
                   {errors.admin?.nombre && <p className="text-red-400 text-xs mt-1">{errors.admin.nombre.message}</p>}
                 </div>
                 <div>
-                  <label className="label">Email *</label>
-                  <input {...register('admin.email')} type="email" className="input" placeholder="admin@empresa.com" />
+                  <label htmlFor="RegisterPage-register-admin-email" className="label">Email *</label>
+                  <input id="RegisterPage-register-admin-email" {...register('admin.email')} type="email" className="input" placeholder="admin@empresa.com" />
                   {errors.admin?.email && <p className="text-red-400 text-xs mt-1">{errors.admin.email.message}</p>}
                 </div>
                 <div>
-                  <label className="label">Contraseña *</label>
-                  <input {...register('admin.password')} type="password" className="input" placeholder="Mín. 8 caracteres, mayúscula y número" />
+                  <label htmlFor="RegisterPage-register-admin-password" className="label">Contraseña *</label>
+                  <input id="RegisterPage-register-admin-password" {...register('admin.password')} type="password" className="input" placeholder="Mín. 8 caracteres, mayúscula y número" />
                   {errors.admin?.password && <p className="text-red-400 text-xs mt-1">{errors.admin.password.message}</p>}
                 </div>
               </div>
