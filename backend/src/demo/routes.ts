@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { createDemoStore, DemoError, type Database } from './store';
 import type { JsonPersistence } from './persistence';
 import { StorageConflictError } from './persistence';
+import { contract, termsRequired } from '../legal/contract';
 
 const nonempty = z.string().trim().min(1);
 const date = z.string().refine(v => Number.isFinite(Date.parse(v)), 'Fecha inválida');
@@ -31,7 +32,7 @@ export function createDemoRouter(source: string | JsonPersistence<Database>, sec
       if (typeof payload.sid !== 'string' || typeof payload.sub !== 'string') throw new Error();
       const entry = await store.session('get', payload.sid);
       if (payload.kind !== kind || !entry || entry.userId !== payload.sub || entry.expires < Date.now()) throw new Error();
-      return { userId: entry.userId, sid: payload.sid as string };
+      return { userId: entry.userId, sid: payload.sid as string, termsAccepted: entry.termsVersion === contract.version, acceptedAt: entry.termsAcceptedAt };
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError || (error instanceof Error && !error.message)) throw new DemoError('Sesión inválida o expirada.', 401);
       throw error;
@@ -67,6 +68,15 @@ export function createDemoRouter(source: string | JsonPersistence<Database>, sec
       }
       const session = await verify(req.headers.authorization?.replace(/^Bearer /, ''), 'access');
       const current = await store.execute({ url: '/auth/me', method: 'get', actorId: session.userId }) as SessionData;
+      if (req.path === '/auth/terms' && method === 'get') {
+        res.json({ data: { ...contract, accepted: session.termsAccepted, acceptedAt: session.acceptedAt } }); return;
+      }
+      if (req.path === '/auth/terms/accept' && method === 'post') {
+        const acceptance = z.object({ version: z.literal(contract.version), accepted: z.literal(true) }).parse(req.body);
+        const accepted = await store.session('acceptTerms', session.sid, session.userId, acceptance.version);
+        res.json({ data: { accepted: true, version: contract.version, acceptedAt: accepted!.termsAcceptedAt } }); return;
+      }
+      if (!session.termsAccepted && req.path !== '/auth/me') { res.status(403).json(termsRequired); return; }
       if (extra) throw new DemoError('Ruta no encontrada.', 404);
       if (method !== 'get') {
         const allowed = ['usuarios', 'sedes', 'empresa'].includes(kind) ? ['administrador'] : kind === 'equipos' ? ['administrador', 'responsable'] : ['administrador', 'responsable', 'tecnico'];

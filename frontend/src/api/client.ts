@@ -19,6 +19,10 @@ let refreshRequest: Promise<string> | null = null;
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.response?.status === 403 && error.response?.data?.code === 'TERMS_REQUIRED') {
+      window.location.assign('/dashboard');
+      return Promise.reject(error);
+    }
     if (typeof error.response?.data?.message === 'string') error.message = error.response.data.message;
     const original = error.config;
     if (error.response?.status === 401 && original && !original._retry && !original.url?.startsWith('/auth/login')) {

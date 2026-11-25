@@ -11,7 +11,7 @@ const crypto = { randomUUID };
 
 type Row = { id: string; [key: string]: unknown };
 type Collection = 'equipos' | 'fallas' | 'mantenimientos' | 'usuarios' | 'sedes' | 'notificaciones' | 'historial';
-type DemoSession = { userId: string; expires: number };
+type DemoSession = { userId: string; expires: number; termsVersion?: string; termsAcceptedAt?: string };
 export type Database = Record<Collection, Row[]> & { empresa: Row; configuracion: Row; passwords: Record<string, string>; sessions?: Record<string, DemoSession> };
 const now = () => new Date().toISOString();
 const day = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + offset); d.setHours(12, 0, 0, 0); return d.toISOString(); };
@@ -228,7 +228,7 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
     execute(input: DemoRequest): Promise<unknown> {
       return persistence.transaction(initial, db => execute(db, input));
     },
-    session(action: 'create' | 'get' | 'delete', sid: string, userId?: string): Promise<DemoSession | undefined> {
+    session(action: 'create' | 'get' | 'delete' | 'acceptTerms', sid: string, userId?: string, termsVersion?: string): Promise<DemoSession | undefined> {
       return persistence.transaction(initial, async db => {
         const sessions = db.sessions ??= {};
         if (action === 'create') {
@@ -237,6 +237,12 @@ export function createDemoStore(source: string | JsonPersistence<Database>) {
           for (const [id, session] of Object.entries(sessions)) if (session.expires < Date.now()) delete sessions[id];
           sessions[sid] = { userId: user!.id, expires: Date.now() + 7 * 24 * 60 * 60 * 1000 };
         } else if (action === 'delete') delete sessions[sid];
+        else if (action === 'acceptTerms') {
+          const entry = sessions[sid];
+          if (!entry || entry.expires < Date.now() || entry.userId !== userId) throw new DemoError('Sesión inválida o expirada.', 401);
+          entry.termsVersion = termsVersion;
+          entry.termsAcceptedAt ??= new Date().toISOString();
+        }
         return sessions[sid];
       });
     },

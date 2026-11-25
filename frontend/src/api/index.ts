@@ -1,6 +1,8 @@
 import api from './client';
 
 export const authApi = {
+  terms: () => api.get('/auth/terms'),
+  acceptTerms: (version: string) => api.post('/auth/terms/accept', { version, accepted: true }),
   perfil: (data: unknown) => api.put('/auth/perfil', data),
   register: (data: unknown) => api.post('/auth/register', data),
   login: (data: unknown) => api.post('/auth/login', data),

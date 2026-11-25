@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import AppLayout from './components/layout/AppLayout';
+import TermsGate from './components/common/TermsGate';
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const EquiposPage = lazy(() => import('./pages/equipos/EquiposPage'));
@@ -23,7 +24,7 @@ const queryClient = new QueryClient({
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <TermsGate>{children}</TermsGate> : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {

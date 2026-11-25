@@ -114,6 +114,9 @@ test('Blob HTTP: login, refresh, data and logout survive switching function inst
   const cookie = login.headers.get('set-cookie').split(';')[0];
   const second = await instance();
   const headers = { Authorization: 'Bearer ' + token, Cookie: cookie, 'Content-Type': 'application/json' };
+    assert.equal((await fetch(second + '/equipos', { headers })).status, 403);
+    const contract = (await (await fetch(second + '/auth/terms', { headers })).json()).data;
+    assert.equal((await fetch(second + '/auth/terms/accept', { method: 'POST', headers, body: JSON.stringify({ version: contract.version, accepted: true }) })).status, 200);
   assert.equal((await fetch(second + '/equipos', { headers })).status, 200);
   assert.equal((await fetch(second + '/auth/refresh', { method: 'POST', headers })).status, 200);
   const created = await fetch(second + '/equipos', { method: 'POST', headers, body: JSON.stringify({ nombre: 'Equipo compartido', tipo: 'desktop' }) });

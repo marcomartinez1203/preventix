@@ -1,0 +1,408 @@
+{
+  "version": "d872fca1e7db4694e532e23d84ba64cbc07f69a57104e037dd70e2f95a0b494f",
+  "title": "Contrato de licencia y condiciones de uso de PREVENTIX",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Contrato de licencia y condiciones de uso de PREVENTIX"
+    },
+    {
+      "type": "paragraph",
+      "text": "Versión contractual 1.2   |   Fecha de suscripción [día, mes y año]   |   Ciudad [completar]"
+    },
+    {
+      "type": "paragraph",
+      "text": "Celebran este contrato [nombre o razón social de quien opera bajo el nombre Cognitek], con [NIT o documento], domicilio en [dirección y ciudad], representado, si corresponde, por [nombre, cargo e identificación], en adelante COGNITEK, y [nombre o razón social del cliente], con [NIT o documento], domicilio en [dirección y ciudad], representado, si corresponde, por [nombre, cargo e identificación], en adelante el CLIENTE."
+    },
+    {
+      "type": "paragraph",
+      "text": "1   Objeto y documentos del contrato"
+    },
+    {
+      "type": "paragraph",
+      "text": "COGNITEK concede al CLIENTE el uso interno de PREVENTIX para gestionar equipos, fallas y mantenimiento en la modalidad indicada en la ficha contractual. Las reparaciones físicas y el suministro de repuestos quedan fuera del servicio."
+    },
+    {
+      "type": "paragraph",
+      "text": "La ficha identifica la versión, las funciones y las condiciones económicas contratadas. Si el CLIENTE encarga una adaptación, ambas partes suscribirán una orden de desarrollo. La orden prevalecerá para ese trabajo solo en los puntos que identifique y modifique expresamente. Los cambios sustanciales requieren acuerdo verificable y no tendrán efecto retroactivo."
+    },
+    {
+      "type": "paragraph",
+      "text": "2   Licencia y derechos de propiedad intelectual"
+    },
+    {
+      "type": "paragraph",
+      "text": "La licencia es no exclusiva y se limita a la vigencia contratada y a los usuarios autorizados por el CLIENTE. COGNITEK conserva los derechos que le correspondan sobre el programa, la documentación y sus componentes preexistentes. La reventa, sublicencia o distribución requiere autorización escrita, con respeto de las facultades legales del usuario y las licencias de terceros."
+    },
+    {
+      "type": "paragraph",
+      "text": "El CLIENTE conserva los derechos que le correspondan sobre sus datos. COGNITEK solo podrá utilizarlos para prestar el servicio, atender solicitudes y cumplir obligaciones legales dentro de las finalidades informadas."
+    },
+    {
+      "type": "paragraph",
+      "text": "3   Funciones de la versión contratada"
+    },
+    {
+      "type": "paragraph",
+      "text": "La ficha identificará cuáles de las siguientes funciones incluye la instalación: gestión de sesiones, perfiles, usuarios y roles, inventario de equipos con asignación, archivo y restauración, registro de fallas, diagnósticos y soluciones, programación de mantenimientos, actividades y costos, historiales, indicadores, avisos internos y reportes XLSX. También podrán incluirse presupuestos, garantías, contratos de soporte y datos de la organización."
+    },
+    {
+      "type": "paragraph",
+      "text": "4   Indicadores y decisiones de mantenimiento"
+    },
+    {
+      "type": "paragraph",
+      "text": "El tiempo medio entre fallas (MTBF), los indicadores de riesgo y las proyecciones de costos se estiman con reglas y datos históricos. El CLIENTE verificará los datos y decidirá si corresponde intervenir el equipo. Una sugerencia requiere confirmación expresa del usuario para programarse y no genera recurrencias automáticas."
+    },
+    {
+      "type": "paragraph",
+      "text": "5   Cuentas y permisos"
+    },
+    {
+      "type": "paragraph",
+      "text": "El CLIENTE designará un administrador para autorizar usuarios, asignar roles y retirar los accesos que dejen de ser necesarios. Cada usuario custodiará sus credenciales y comunicará cualquier uso indebido al administrador o al canal de soporte."
+    },
+    {
+      "type": "paragraph",
+      "text": "Los roles previstos son administrador, responsable, técnico y consulta. En el almacén de demostración, un usuario con permiso de lectura puede consultar equipos distintos de los asignados y el estado de los avisos es compartido. Antes de cargar información restringida, el CLIENTE verificará que la modalidad elegida ofrece la separación de accesos que necesita."
+    },
+    {
+      "type": "paragraph",
+      "text": "6   Obligaciones de las partes"
+    },
+    {
+      "type": "paragraph",
+      "text": "COGNITEK habilitará el acceso o entregará la instalación pactada, identificará la versión entregada y sus requisitos técnicos, atenderá los reportes por el canal convenido y cumplirá las obligaciones de seguridad, confidencialidad y protección de datos a su cargo."
+    },
+    {
+      "type": "paragraph",
+      "text": "El CLIENTE suministrará información lícita y razonablemente exacta, mantendrá la infraestructura y conectividad a su cargo, administrará las cuentas y pagará los valores acordados. Cada parte facilitará la investigación de incidentes dentro de su ámbito de control."
+    },
+    {
+      "type": "paragraph",
+      "text": "7   Usos prohibidos"
+    },
+    {
+      "type": "paragraph",
+      "text": "Se prohíbe utilizar PREVENTIX para actividades ilícitas, acceder sin autorización a cuentas o información ajenas, introducir código malicioso, alterar registros para ocultar actuaciones indebidas o perturbar deliberadamente el servicio. Las pruebas de seguridad sobre entornos operativos deberán coordinarse previamente. Estas restricciones no limitan derechos irrenunciables ni actividades expresamente permitidas por la ley."
+    },
+    {
+      "type": "paragraph",
+      "text": "8   Datos personales y confidencialidad"
+    },
+    {
+      "type": "paragraph",
+      "text": "El CLIENTE es responsable del tratamiento cuando decide para qué se utilizan los datos que incorpora. Cuando COGNITEK aloje, consulte o recupere esos datos por cuenta del CLIENTE, actuará como encargado y seguirá sus instrucciones documentadas. COGNITEK será responsable de los tratamientos propios que determine para facturación o gestión contractual e informará sus finalidades."
+    },
+    {
+      "type": "paragraph",
+      "text": "Antes de tratar datos personales, las partes completarán en la ficha las categorías de datos y titulares, el propósito, las operaciones autorizadas, la duración y los terceros con acceso. El responsable identificará la base legal, obtendrá las autorizaciones exigibles e informará la política y el canal para consultas y reclamos. Los titulares podrán consultar, actualizar y rectificar sus datos y ejercer los demás derechos legales por ese canal. Este contrato no autoriza el uso publicitario de los datos."
+    },
+    {
+      "type": "paragraph",
+      "text": "El encargado aplicará medidas de seguridad acordes al riesgo, exigirá reserva a quienes tengan acceso y remitirá al responsable las solicitudes de titulares para su atención dentro de los plazos legales. Las partes documentarán cualquier nuevo proveedor o país de tratamiento antes de habilitarlo y cumplirán las reglas aplicables a la transmisión o transferencia internacional."
+    },
+    {
+      "type": "paragraph",
+      "text": "Cada parte usará la información confidencial de la otra solo para ejecutar el contrato y limitará el acceso a quienes la necesiten. La reserva subsiste mientras la información sea confidencial. Se admite la divulgación autorizada, la de información legítimamente pública o la exigida por autoridad competente, limitada en este caso a lo requerido."
+    },
+    {
+      "type": "paragraph",
+      "text": "9   Modalidad de operación y límites del servicio"
+    },
+    {
+      "type": "paragraph",
+      "text": "En instalación local, el CLIENTE administra el entorno bajo su control. Si contrata alojamiento, la ficha identificará al operador y asignará la administración del servidor, las actualizaciones y los respaldos. La disponibilidad, la capacidad concurrente y los tiempos de respuesta solo tendrán valores específicos si se pactan por escrito. COGNITEK mantiene sus obligaciones de calidad y diligencia."
+    },
+    {
+      "type": "paragraph",
+      "text": "Los avisos aparecen dentro de PREVENTIX. El historial permite seguimiento y puede modificarse según los permisos. Los reportes XLSX cubren la información exportada y no sustituyen un respaldo completo ni los registros contables exigibles. Registrar una garantía o un contrato de soporte de un equipo no convierte a COGNITEK en su garante."
+    },
+    {
+      "type": "paragraph",
+      "text": "10   Soporte y seguridad"
+    },
+    {
+      "type": "paragraph",
+      "text": "El CLIENTE reportará el incidente por el canal de la ficha, indicando versión, operación afectada, resultado esperado e impacto. Adjuntará evidencias sin contraseñas ni datos personales innecesarios. COGNITEK confirmará la recepción, comunicará el diagnóstico disponible y dejará constancia de la solución o del paso siguiente. El horario y los tiempos comprometidos serán los pactados."
+    },
+    {
+      "type": "paragraph",
+      "text": "La parte que detecte un incidente que pueda afectar los datos o la disponibilidad avisará a la otra sin demora indebida por el canal pactado. Informará lo que conozca del alcance, aplicará medidas de contención y actualizará el reporte. Cada parte atenderá los avisos a autoridades o titulares que le correspondan."
+    },
+    {
+      "type": "paragraph",
+      "text": "11   Precio y vigencia"
+    },
+    {
+      "type": "paragraph",
+      "text": "La ficha indicará el valor o la gratuidad de la licencia, moneda, impuestos, fechas de pago y vigencia. Cada desarrollo tendrá un precio separado en su orden. Cualquier cargo adicional o renovación automática requiere pacto expreso. Las partes documentarán por escrito la facturación de cada hito y los anticipos que deban descontarse."
+    },
+    {
+      "type": "paragraph",
+      "text": "12   Resolución del contrato, terminación y suspensión"
+    },
+    {
+      "type": "paragraph",
+      "text": "El contrato termina por vencimiento o acuerdo de las partes. Ante un incumplimiento material subsanable, la parte cumplida notificará los hechos y la obligación afectada según la cláusula 19. El plazo de subsanación de la ficha correrá desde la recepción del aviso. Si el incumplimiento persiste, la parte cumplida podrá comunicar la terminación pactada o solicitar ante la autoridad competente la resolución o el cumplimiento del contrato y los perjuicios que procedan. La suspensión se limitará a la prestación afectada."
+    },
+    {
+      "type": "paragraph",
+      "text": "Ante un riesgo grave de seguridad u orden legal, la restricción podrá ser inmediata y proporcional. Se comunicará tan pronto sea posible y se levantará al cesar la causa si el contrato sigue vigente. Al cierre, las partes definirán los servicios causados, entregables aceptados, anticipos y sumas por pagar, devolver o restituir. Para trabajos en curso se aplicará la orden. Subsisten la recuperación de datos, la reserva y las responsabilidades causadas."
+    },
+    {
+      "type": "paragraph",
+      "text": "13   Copias y recuperación de información"
+    },
+    {
+      "type": "paragraph",
+      "text": "Guardar registros en PREVENTIX no crea por sí solo una copia de seguridad. La ficha asignará las copias, su frecuencia y retención. Al cierre, quien custodie los datos facilitará su entrega al destinatario autorizado en el plazo, alcance, formato y canal pactados. El destinatario verificará la legibilidad. El custodio documentará la eliminación o anonimización posterior, incluido el ciclo de los respaldos, salvo conservación legal obligatoria. El ejercicio de derechos sobre datos personales no se condiciona al pago."
+    },
+    {
+      "type": "paragraph",
+      "text": "14   Desarrollo por encargo y cambios de alcance"
+    },
+    {
+      "type": "paragraph",
+      "text": "Las partes completarán una orden por cada módulo, integración o adaptación. Antes de iniciar, acordarán entregables, exclusiones, hitos, precio, insumos, responsables y pruebas de aceptación. Si falta un insumo, quien detecte la dependencia avisará por escrito y propondrá el ajuste de fechas que corresponda al impacto documentado."
+    },
+    {
+      "type": "paragraph",
+      "text": "Cualquiera de las partes podrá solicitar un cambio describiendo la necesidad. COGNITEK indicará qué entregables, pruebas, precio y fechas se afectarían. Solo la aprobación escrita de ambas partes modifica la orden. Hasta entonces seguirá vigente el alcance anterior. Corregir una desviación imputable a COGNITEK respecto de un requisito aprobado forma parte del precio acordado."
+    },
+    {
+      "type": "paragraph",
+      "text": "15   Entrega y aceptación de desarrollos"
+    },
+    {
+      "type": "paragraph",
+      "text": "COGNITEK notificará el hito e identificará la versión, el entorno de prueba y la evidencia de entrega. El plazo de revisión comenzará cuando el CLIENTE tenga acceso al entregable y a los insumos de prueba acordados. Su responsable ejecutará los casos de la orden y comunicará por escrito la aceptación o las diferencias, con el criterio afectado y el resultado observado."
+    },
+    {
+      "type": "paragraph",
+      "text": "COGNITEK corregirá a su cargo los defectos que le sean imputables y presentará la nueva versión para repetir las pruebas afectadas en el plazo de la orden. Las partes podrán aceptar pendientes menores dejando constancia de su responsable y fecha de cierre. El silencio no equivale a aceptación. Si vence el plazo sin respuesta, los responsables revisarán el hito y documentarán la decisión o acudirán al mecanismo de la cláusula 20. La aceptación no extingue las garantías aplicables."
+    },
+    {
+      "type": "paragraph",
+      "text": "16   Propiedad intelectual de los desarrollos y código fuente"
+    },
+    {
+      "type": "paragraph",
+      "text": "Antes de iniciar cada encargo, la orden distinguirá el código nuevo, los elementos preexistentes de cada parte y los componentes de terceros. Precisará si el CLIENTE recibe licencia o cesión sobre el código nuevo, las modalidades de explotación, territorio, plazo, exclusividad y momento de efecto. Las partes respetarán los derechos morales de los autores y las licencias de terceros."
+    },
+    {
+      "type": "paragraph",
+      "text": "La orden identificará si se entregan código fuente, documentación, instrucciones de compilación o acceso al repositorio, y cómo se entregan. La entrega de una copia del código y la transferencia de derechos son actos distintos. Una cesión se pactará por escrito e identificará la obra y los derechos cedidos. COGNITEK deberá contar con las autorizaciones necesarias para otorgar lo convenido."
+    },
+    {
+      "type": "paragraph",
+      "text": "17   Garantías del software y de los desarrollos"
+    },
+    {
+      "type": "paragraph",
+      "text": "COGNITEK se obliga a que la versión suministrada cumpla las funciones incluidas en la ficha y a que cada desarrollo aceptado satisfaga las especificaciones de su orden. La garantía de funcionamiento cubre los defectos atribuibles a COGNITEK. Las partes consignarán en la ficha o en la orden el plazo de cobertura y la fecha o el hecho que da inicio a su cómputo, sin reducir la garantía legal aplicable."
+    },
+    {
+      "type": "paragraph",
+      "text": "Para solicitar la garantía, el CLIENTE describirá la función afectada, el resultado esperado y el observado por el canal de soporte o por los canales de la cláusula 19. COGNITEK dejará constancia del reclamo, investigará su causa y comunicará por escrito el diagnóstico, la medida propuesta y el plazo de atención. Corregirá a su cargo el defecto cubierto y pondrá la versión corregida a disposición del CLIENTE para su verificación."
+    },
+    {
+      "type": "paragraph",
+      "text": "Si la corrección resulta imposible o el defecto persiste, el CLIENTE podrá ejercer los remedios contractuales y legales que procedan. Si COGNITEK atribuye la falla a una causa externa, deberá sustentar la relación entre esa causa y el defecto reclamado. Una solicitud de funcionalidad nueva se tramitará conforme a la cláusula 14."
+    },
+    {
+      "type": "paragraph",
+      "text": "18   Responsabilidad de las partes y fuerza mayor"
+    },
+    {
+      "type": "paragraph",
+      "text": "Cada parte responderá por los daños que cause al incumplir las obligaciones a su cargo. COGNITEK responderá por los defectos imputables al software entregado y por el incumplimiento de los servicios asumidos. El CLIENTE responderá por los incumplimientos que le sean imputables en la administración de usuarios, la licitud de los datos y la infraestructura bajo su control. Se preserva la responsabilidad por dolo, culpa grave e incumplimiento de las obligaciones de protección de datos."
+    },
+    {
+      "type": "paragraph",
+      "text": "La parte que invoque fuerza mayor informará el hecho, su impacto sobre la prestación y las medidas adoptadas para mitigarlo. El carácter estimativo de los indicadores no exime a COGNITEK de entregar las funciones contratadas."
+    },
+    {
+      "type": "paragraph",
+      "text": "19   Notificaciones contractuales"
+    },
+    {
+      "type": "paragraph",
+      "text": "Las reclamaciones, requerimientos por incumplimiento, decisiones de terminación y solicitudes de cambio se enviarán al correo contractual designado por el destinatario o se entregarán en su dirección física con constancia de recibo. Quien notifique identificará el contrato, el asunto y la medida solicitada. Cada parte comunicará cualquier cambio de dirección por uno de los canales vigentes."
+    },
+    {
+      "type": "paragraph",
+      "text": "El remitente conservará el aviso y su constancia de entrega. Si recibe un aviso de rechazo o devolución, utilizará el otro canal designado. La recepción electrónica se determinará conforme a la Ley 527 de 1999. Los avisos internos de mantenimiento de PREVENTIX cumplen una función operativa. Las notificaciones judiciales se rigen por sus propias reglas."
+    },
+    {
+      "type": "paragraph",
+      "text": "20   Ley aplicable y jurisdicción competente"
+    },
+    {
+      "type": "paragraph",
+      "text": "El contrato se rige por la ley colombiana. Las partes podrán buscar un arreglo directo. Si persiste la controversia, conocerán los jueces de la jurisdicción ordinaria en su especialidad civil, según las reglas de competencia por materia, cuantía y territorio. En relaciones de consumo, el consumidor podrá acudir también a la Superintendencia de Industria y Comercio cuando tenga competencia jurisdiccional. Se respetarán los requisitos de procedibilidad y los derechos imperativos, incluidos el retracto y la reversión del pago cuando procedan."
+    },
+    {
+      "type": "paragraph",
+      "text": "Ficha contractual y firmas"
+    },
+    {
+      "type": "paragraph",
+      "text": "Las partes completarán esta ficha antes de suscribir el contrato. En los campos que no correspondan a la modalidad elegida, indicarán «No aplica»."
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Condición",
+          "Acuerdo de las partes"
+        ],
+        [
+          "Versión y modalidad",
+          "[Versión del software, módulos habilitados y modalidad local, alojada o de demostración. Límites de usuarios o sedes, si se pactan.]"
+        ],
+        [
+          "Vigencia y renovación",
+          "[Inicio, vencimiento, condiciones de renovación y aviso, si aplica.]"
+        ],
+        [
+          "Precio de la licencia",
+          "[Valor o gratuidad, moneda, impuestos, periodicidad, medio y vencimiento de pago. Condiciones de devolución.]"
+        ],
+        [
+          "Contactos y avisos",
+          "[Correo contractual y dirección física de cada parte, con ciudad. Administrador del CLIENTE y canal de incidentes urgentes.]"
+        ],
+        [
+          "Soporte y niveles de servicio",
+          "[Canal, horario, zona horaria, cobertura y tiempos de respuesta pactados. Identificar el acuerdo de servicio, si existe.]"
+        ],
+        [
+          "Garantía de funcionamiento",
+          "[Inicio y duración de la cobertura, canal de reclamos y plazo de atención de defectos cubiertos.]"
+        ],
+        [
+          "Infraestructura y terceros",
+          "[Responsable de instalación, servidor y actualizaciones. Operadores autorizados, función y países de alojamiento o acceso.]"
+        ],
+        [
+          "Tratamiento de datos",
+          "[Responsable, encargado, titulares, tipos de datos, finalidad, operaciones autorizadas y duración. Política y canal para ejercer derechos.]"
+        ],
+        [
+          "Respaldos y restauración",
+          "[Responsable, frecuencia de copia, retención, responsable de verificar la restauración y canal de solicitud.]"
+        ],
+        [
+          "Subsanación y salida",
+          "[Plazo para subsanar. Datos que se devolverán, formato, destinatario, canal seguro, plazo de entrega y verificación. Plazo para depurar datos y respaldos.]"
+        ],
+        [
+          "Documentos aplicables",
+          "[Identificar por fecha y versión las órdenes, anexos de datos o niveles de servicio suscritos, si los hay.]"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Aceptación del contrato"
+    },
+    {
+      "type": "paragraph",
+      "text": "Las partes podrán firmar en papel o por un medio electrónico fiable y apropiado que permita identificar a cada firmante y acreditar su aprobación. Cada parte conservará una copia accesible del texto, sus anexos, la versión, la fecha y la constancia de aceptación."
+    },
+    {
+      "type": "paragraph",
+      "text": "Por COGNITEKPor el CLIENTE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Firma __________________________Firma __________________________Nombre y cargo [completar]Nombre y cargo [completar]Fecha [día/mes/año]Fecha [día/mes/año]"
+    },
+    {
+      "type": "paragraph",
+      "text": "Orden de desarrollo para PREVENTIX"
+    },
+    {
+      "type": "paragraph",
+      "text": "Completar y aprobar únicamente cuando el CLIENTE contrate un desarrollo adicional. Para varios hitos, duplicar la fila correspondiente y asignar a cada uno sus pruebas y pagos."
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Campo",
+          "Condiciones del encargo"
+        ],
+        [
+          "Identificación",
+          "[Número, fecha, referencia al contrato y responsables de ambas partes.]"
+        ],
+        [
+          "Alcance y exclusiones",
+          "[Solicitud, funciones incluidas y excluidas. Versión de referencia, dependencias, datos de prueba y quién los aporta.]"
+        ],
+        [
+          "Hito y entregables",
+          "[Hito, fecha, versión, entorno y medio de entrega. Describir el módulo, archivos o documentación que se recibirán.]"
+        ],
+        [
+          "Prueba de aceptación",
+          "[Datos iniciales, acción, resultado esperado, evidencia y responsable. Ejemplo para un filtro encargado: con un equipo activo y otro archivado, el reporte de activos muestra solo el primero.]"
+        ],
+        [
+          "Revisión y corrección",
+          "[Plazo para revisar, corregir y repetir pruebas. Inicio, duración y canal de la garantía del desarrollo después de su aceptación.]"
+        ],
+        [
+          "Precio y pagos",
+          "[Valor, moneda, impuestos, anticipo, importe por hito, hecho que habilita el cobro y fecha de pago.]"
+        ],
+        [
+          "Derechos y entrega técnica",
+          "[Identificar código nuevo y preexistente, licencias de terceros, licencia o cesión, usos, plazo, territorio, exclusividad y fecha de efecto. Precisar código fuente, repositorio y documentación a entregar.]"
+        ],
+        [
+          "Cierre anticipado",
+          "[Tratamiento del trabajo en curso, avances aprovechables, anticipos, entrega de materiales y derechos de uso sobre lo entregado.]"
+        ],
+        [
+          "Condiciones particulares",
+          "[Cláusula modificada expresamente, alcance de la modificación y autorizados para aprobar cambios.]"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "Por COGNITEKPor el CLIENTE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Firma __________________________Firma __________________________Nombre y cargo [completar]Nombre y cargo [completar]Fecha [día/mes/año]Fecha [día/mes/año]"
+    },
+    {
+      "type": "paragraph",
+      "text": "Referencias de redacción"
+    },
+    {
+      "type": "paragraph",
+      "text": "Fuentes de consulta. Las condiciones aplicables a las partes son las del contrato y las órdenes suscritas."
+    },
+    {
+      "type": "paragraph",
+      "text": "Odoo Enterprise · condiciones de suscripción   ·   Model Services Contract · pruebas y cambios"
+    },
+    {
+      "type": "paragraph",
+      "text": "Ley 527 de 1999   ·   Ley 1581 de 2012   ·   Decreto 1074 de 2015   ·   Ley 1480 de 2011"
+    },
+    {
+      "type": "paragraph",
+      "text": "Ley 23 de 1982 · art. 20 (Ley 1450 de 2011, art. 28)   ·   Ley 23 de 1982 · art. 183"
+    },
+    {
+      "type": "paragraph",
+      "text": "Código de Comercio · art. 870   ·   Código General del Proceso · arts. 24 y 28"
+    }
+  ]
+}

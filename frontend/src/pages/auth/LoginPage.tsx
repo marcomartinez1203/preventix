@@ -7,11 +7,13 @@ import BrandLogo from '../../components/common/BrandLogo';
 import { authApi } from '../../api';
 import { useAuthStore } from '../../stores/authStore';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 const schema = z.object({ email: z.string().email('Email inválido'), password: z.string().min(1, 'Contraseña requerida') });
 type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
+  const cache = useQueryClient();
   const navigate = useNavigate();
   const setAuth = useAuthStore(s => s.setAuth);
   const [error, setError] = useState('');
@@ -23,6 +25,7 @@ export default function LoginPage() {
       setError('');
       const res = await authApi.login(data);
       const { accessToken, usuario, empresa } = res.data.data;
+      cache.clear();
       setAuth(accessToken, usuario, empresa);
       navigate('/dashboard');
     } catch (err: unknown) {

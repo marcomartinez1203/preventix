@@ -4,8 +4,11 @@ import { prisma } from '../../config/database';
 import { config } from '../../config';
 import { createError } from '../../middlewares/error.middleware';
 import { RegisterInput, LoginInput } from './auth.schema';
+import { randomUUID } from 'node:crypto';
+import { contract } from '../../legal/contract';
 
-const generateTokens = (payload: object) => {
+const generateTokens = (input: Record<string, unknown>) => {
+  const payload = { ...input, sid: input.sid || randomUUID() };
   const accessToken = jwt.sign(payload, config.jwt.secret, {
     expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'],
   });
@@ -135,18 +138,34 @@ export const refreshAccessToken = async (token: string) => {
   if (!usuario) throw createError('Refresh token revocado', 401);
 
   const { accessToken, refreshToken: newRefreshToken } = generateTokens({
+    sid: payload.sid,
+    termsVersion: payload.termsVersion,
+    termsAcceptedAt: payload.termsAcceptedAt,
     userId: usuario.id,
     empresaId: usuario.empresaId,
     rol: usuario.rol,
     esTecnicoExterno: usuario.esTecnicoExterno,
   });
 
-  await prisma.usuario.update({
-    where: { id: usuario.id },
+  const refreshed = await prisma.usuario.updateMany({
+    where: { id: usuario.id, refreshToken: token },
     data: { refreshToken: newRefreshToken },
   });
+  if (!refreshed.count) throw createError('La sesión cambió. Vuelve a iniciar sesión.', 401);
 
   return { accessToken, refreshToken: newRefreshToken };
+};
+
+export const acceptTerms = async (userId: string, sid: string) => {
+  const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
+  if (!usuario?.activo || !usuario.refreshToken) throw createError('Sesión inválida', 401);
+  const current = jwt.verify(usuario.refreshToken, config.jwt.refreshSecret) as jwt.JwtPayload;
+  if (current.sid !== sid) throw createError('Sesión inválida', 401);
+  const acceptedAt = new Date().toISOString();
+  const tokens = generateTokens({ userId, empresaId: usuario.empresaId, rol: usuario.rol, esTecnicoExterno: usuario.esTecnicoExterno, sid, termsVersion: contract.version, termsAcceptedAt: acceptedAt });
+  const updated = await prisma.usuario.updateMany({ where: { id: userId, refreshToken: usuario.refreshToken }, data: { refreshToken: tokens.refreshToken } });
+  if (!updated.count) throw createError('La sesión cambió. Vuelve a iniciar sesión.', 401);
+  return { ...tokens, acceptedAt };
 };
 
 export const logout = async (userId: string) => {

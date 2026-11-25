@@ -31,9 +31,13 @@ async function fixture(t) {
     const json = await response.json();
     return { status: response.status, data: json.data, message: json.message, cookie: response.headers.get('set-cookie') };
   }
-  async function login(email = 'demo@preventix.com', password = 'Demo1234') {
+  async function login(email = 'demo@preventix.com', password = 'Demo1234', accept = true) {
     const result = await request('POST', '/auth/login', { email, password }, false);
     if (result.status === 200) { token = result.data.accessToken; cookie = result.cookie.split(';')[0]; }
+    if (result.status === 200 && accept) {
+      const contract = (await request('GET', '/auth/terms')).data;
+      assert.equal((await request('POST', '/auth/terms/accept', { version: contract.version, accepted: true })).status, 200);
+    }
     return result;
   }
   t.after(async () => {
@@ -238,4 +242,31 @@ test('HTTP: annual budget, persistent alerts and inventory recommendation are co
   await f.restart(); await f.login();
   assert.deepEqual((await f.request('GET', '/notificaciones')).data.filter(n => n.tipo === 'presupuesto').map(n => n.id), notices.map(n => n.id));
   assert.equal((await f.request('GET', '/dashboard/presupuesto')).data.anual.gasto, report.anual.gasto);
+});
+
+test('HTTP: contract gates every login, rejects invalid consent and survives refresh/restart', async t => {
+  const f = await fixture(t);
+  await f.login('demo@preventix.com', 'Demo1234', false);
+  const contract = (await f.request('GET', '/auth/terms')).data;
+  assert.equal(contract.accepted, false);
+  assert.equal(contract.blocks.filter(b => b.type === 'table').length, 2);
+  for (const url of ['/equipos', '/dashboard/resumen', '/empresa/configuracion', '/notificaciones']) assert.equal((await f.request('GET', url)).status, 403);
+  assert.equal((await f.request('POST', '/equipos', { nombre: 'No autorizado', tipo: 'desktop' })).status, 403);
+  assert.equal((await f.request('POST', '/auth/terms/accept', { accepted: false, version: contract.version })).status, 400);
+  assert.equal((await f.request('POST', '/auth/terms/accept', { accepted: true, version: 'otra' })).status, 400);
+  await f.request('POST', '/auth/refresh', {});
+  assert.equal((await f.request('GET', '/equipos')).status, 403);
+  const accepted = await f.request('POST', '/auth/terms/accept', { accepted: true, version: contract.version });
+  assert.equal(accepted.status, 200);
+  assert.ok(accepted.data.acceptedAt);
+  assert.equal((await f.request('GET', '/equipos')).status, 200);
+  const db = JSON.parse(await readFile(f.file, 'utf8'));
+  assert.ok(Object.values(db.sessions).some(s => s.termsVersion === contract.version && s.termsAcceptedAt));
+  await f.request('POST', '/auth/refresh', {});
+  assert.equal((await f.request('GET', '/auth/terms')).data.accepted, true);
+  await f.request('POST', '/auth/logout', {});
+  assert.equal((await f.request('GET', '/equipos')).status, 401);
+  await f.login('demo@preventix.com', 'Demo1234', false);
+  assert.equal((await f.request('GET', '/auth/terms')).data.accepted, false);
+  assert.equal((await f.request('GET', '/equipos')).status, 403);
 });
