@@ -249,7 +249,9 @@ test('HTTP: contract gates every login, rejects invalid consent and survives ref
   await f.login('demo@preventix.com', 'Demo1234', false);
   const contract = (await f.request('GET', '/auth/terms')).data;
   assert.equal(contract.accepted, false);
-  assert.equal(contract.blocks.filter(b => b.type === 'table').length, 2);
+  assert.equal(contract.blocks.filter(b => b.type === 'table').length, 0);
+  assert.ok(contract.blocks.some(b => b.text.includes('Aceptación en el programa')));
+  assert.ok(contract.blocks.every(b => !/\[|___|Ficha contractual y firmas/.test(b.text)));
   for (const url of ['/equipos', '/dashboard/resumen', '/empresa/configuracion', '/notificaciones']) assert.equal((await f.request('GET', url)).status, 403);
   assert.equal((await f.request('POST', '/equipos', { nombre: 'No autorizado', tipo: 'desktop' })).status, 403);
   assert.equal((await f.request('POST', '/auth/terms/accept', { accepted: false, version: contract.version })).status, 400);
